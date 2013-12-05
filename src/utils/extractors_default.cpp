@@ -5,6 +5,9 @@
 #include "extractor_manager.h"
 #include "grusig_descriptor.h"
 
+/// PROJECT
+#include <utils_param/parameter_factory.h>
+
 /// SYSTEM
 #include <opencv2/nonfree/nonfree.hpp>
 #include <boost/bind.hpp>
@@ -19,21 +22,21 @@ struct Orb : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params {
         KeyParams() {
-            params.push_back(Parameter::declare("extractor_threshold", 0, 200, 50, 1));
-            params.push_back(Parameter::declare("levels", 1, 20, 8, 1));
-            params.push_back(Parameter::declare("edgeThreshold", 0, 64, 0, 1));
-            params.push_back(Parameter::declare("first_level", 0, 8, 0, 1));
-            params.push_back(Parameter::declare("WTA_K", 2, 4, 2, 1));
-            params.push_back(Parameter::declare("patch_size", 0, 128, 31, 1));
+            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 200, 50, 1));
+            params.push_back(ParameterFactory::declare("levels", 1, 20, 8, 1));
+            params.push_back(ParameterFactory::declare("edgeThreshold", 0, 64, 0, 1));
+            params.push_back(ParameterFactory::declare("first_level", 0, 8, 0, 1));
+            params.push_back(ParameterFactory::declare("WTA_K", 2, 4, 2, 1));
+            params.push_back(ParameterFactory::declare("patch_size", 0, 128, 31, 1));
 
-            params.push_back(Parameter::declare("scale", 0.5, 2.0, 1.2, 0.05));
+            params.push_back(ParameterFactory::declare("scale", 0.5, 2.0, 1.2, 0.05));
         }
     };
     static KeyParams& params() {
         static KeyParams p;
         return p;
     }
-    static std::vector<Parameter> usedParameters() {
+    static std::vector<Parameter::Ptr> usedParameters() {
         return params().params;
     }
 
@@ -72,16 +75,16 @@ struct Brisk : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params {
         KeyParams() {
-            params.push_back(Parameter::declare("extractor_threshold", 0, 1000, 50, 1));
-            params.push_back(Parameter::declare("octaves", 0, 10, 4, 1));
-            params.push_back(Parameter::declare("pattern_scale", 0.2, 10.0, 2.0, 0.1));
+            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 1000, 50, 1));
+            params.push_back(ParameterFactory::declare("octaves", 0, 10, 4, 1));
+            params.push_back(ParameterFactory::declare("pattern_scale", 0.2, 10.0, 2.0, 0.1));
         }
     };
     static KeyParams& params() {
         static KeyParams p;
         return p;
     }
-    static std::vector<Parameter> usedParameters() {
+    static std::vector<Parameter::Ptr> usedParameters() {
         return params().params;
     }
 
@@ -121,18 +124,18 @@ struct Sift : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(Parameter::declare("extractor_threshold", 0, 1000, 50, 1));
-            params.push_back(Parameter::declare("nOctaveLayers", 0, 5, 3, 1));
-            params.push_back(Parameter::declare("contrastThreshold", 0.0, 1.0, 0.04, 0.005));
-            params.push_back(Parameter::declare("edgeThreshold", 0.0, 100.0, 10.0, 1.0));
-            params.push_back(Parameter::declare("sigma", 0.0, 5.0, 1.6, 0.01));
+            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 1000, 50, 1));
+            params.push_back(ParameterFactory::declare("nOctaveLayers", 0, 5, 3, 1));
+            params.push_back(ParameterFactory::declare("contrastThreshold", 0.0, 1.0, 0.04, 0.005));
+            params.push_back(ParameterFactory::declare("edgeThreshold", 0.0, 100.0, 10.0, 1.0));
+            params.push_back(ParameterFactory::declare("sigma", 0.0, 5.0, 1.6, 0.01));
         }
     };
     static KeyParams& params() {
         static KeyParams p;
         return p;
     }
-    static std::vector<Parameter> usedParameters() {
+    static std::vector<Parameter::Ptr> usedParameters() {
         return params().params;
     }
     static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
@@ -170,18 +173,18 @@ struct Surf : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(Parameter::declare("extractor_threshold", 0, 5000, 1000, 1));
-            params.push_back(Parameter::declare("nOctaves", 0, 10, 4, 1));
-            params.push_back(Parameter::declare("nOctaveLayers", 0, 10, 2, 1));
-            params.push_back(Parameter::declare("extended", true));
-            params.push_back(Parameter::declare("upright", false));
+            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 5000, 1000, 1));
+            params.push_back(ParameterFactory::declare("nOctaves", 0, 10, 4, 1));
+            params.push_back(ParameterFactory::declare("nOctaveLayers", 0, 10, 2, 1));
+            params.push_back(ParameterFactory::declare("extended", true));
+            params.push_back(ParameterFactory::declare("upright", false));
         }
     };
     static KeyParams& params() {
         static KeyParams p;
         return p;
     }
-    static std::vector<Parameter> usedParameters() {
+    static std::vector<Parameter::Ptr> usedParameters() {
         return params().params;
     }
 
@@ -225,15 +228,15 @@ struct Fast : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(Parameter::declare("extractor_threshold", 0, 200, 50, 1));
-            params.push_back(Parameter::declare("nonmaxSuppression", true));
+            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 200, 50, 1));
+            params.push_back(ParameterFactory::declare("nonmaxSuppression", true));
         }
     };
     static KeyParams& params() {
         static KeyParams p;
         return p;
     }
-    static std::vector<Parameter> usedParameters() {
+    static std::vector<Parameter::Ptr> usedParameters() {
         return params().params;
     }
 
@@ -256,22 +259,22 @@ struct Mser : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(Parameter::declare("delta", 0, 50, 5, 1));
-            params.push_back(Parameter::declare("minArea", 0, 1000, 60, 1));
-            params.push_back(Parameter::declare("maxArea", 0, 30000, 14400, 1));
-            params.push_back(Parameter::declare("maxVariation", 0.0, 1.0, 0.25, 0.01));
-            params.push_back(Parameter::declare("minDiversity", 0.0, 1.0, 0.2, 0.01));
-            params.push_back(Parameter::declare("maxEvolution", 0, 1000, 200, 1));
-            params.push_back(Parameter::declare("areaThreshold", 0.0, 2.0, 1.01, 0.01));
-            params.push_back(Parameter::declare("minMargin", 0.0, 0.1, 0.003, 0.001));
-            params.push_back(Parameter::declare("edgeBlurSize", 0, 50, 5, 1));
+            params.push_back(ParameterFactory::declare("delta", 0, 50, 5, 1));
+            params.push_back(ParameterFactory::declare("minArea", 0, 1000, 60, 1));
+            params.push_back(ParameterFactory::declare("maxArea", 0, 30000, 14400, 1));
+            params.push_back(ParameterFactory::declare("maxVariation", 0.0, 1.0, 0.25, 0.01));
+            params.push_back(ParameterFactory::declare("minDiversity", 0.0, 1.0, 0.2, 0.01));
+            params.push_back(ParameterFactory::declare("maxEvolution", 0, 1000, 200, 1));
+            params.push_back(ParameterFactory::declare("areaThreshold", 0.0, 2.0, 1.01, 0.01));
+            params.push_back(ParameterFactory::declare("minMargin", 0.0, 0.1, 0.003, 0.001));
+            params.push_back(ParameterFactory::declare("edgeBlurSize", 0, 50, 5, 1));
         }
     };
     static KeyParams& params() {
         static KeyParams p;
         return p;
     }
-    static std::vector<Parameter> usedParameters() {
+    static std::vector<Parameter::Ptr> usedParameters() {
         return params().params;
     }
 
@@ -302,14 +305,14 @@ struct Star : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(Parameter::declare("extractor_threshold", 0, 1000, 50, 1));
+            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 1000, 50, 1));
         }
     };
     static KeyParams& params() {
         static KeyParams p;
         return p;
     }
-    static std::vector<Parameter> usedParameters() {
+    static std::vector<Parameter::Ptr> usedParameters() {
         return params().params;
     }
 
@@ -331,14 +334,14 @@ struct Gftt : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(Parameter::declare("extractor_threshold", 0, 1000, 50, 1));
+            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 1000, 50, 1));
         }
     };
     static KeyParams& params() {
         static KeyParams p;
         return p;
     }
-    static std::vector<Parameter> usedParameters() {
+    static std::vector<Parameter::Ptr> usedParameters() {
         return params().params;
     }
 
@@ -360,14 +363,14 @@ struct GfttHarris : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(Parameter::declare("extractor_threshold", 0, 1000, 50, 1));
+            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 1000, 50, 1));
         }
     };
     static KeyParams& params() {
         static KeyParams p;
         return p;
     }
-    static std::vector<Parameter> usedParameters() {
+    static std::vector<Parameter::Ptr> usedParameters() {
         return params().params;
     }
 
@@ -398,7 +401,7 @@ struct Brief : public ExtractorManager::ExtractorInitializer {
         static KeyParams p;
         return p;
     }
-    static std::vector<Parameter> usedParameters() {
+    static std::vector<Parameter::Ptr> usedParameters() {
         return params().params;
     }
 
@@ -424,7 +427,7 @@ struct Freak : public ExtractorManager::ExtractorInitializer {
         static KeyParams p;
         return p;
     }
-    static std::vector<Parameter> usedParameters() {
+    static std::vector<Parameter::Ptr> usedParameters() {
         return params().params;
     }
 
@@ -444,14 +447,14 @@ struct Grusig : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(Parameter::declare("dimension", 1, 35, 10, 1));
+            params.push_back(ParameterFactory::declare("dimension", 1, 35, 10, 1));
         }
     };
     static KeyParams& params() {
         static KeyParams p;
         return p;
     }
-    static std::vector<Parameter> usedParameters() {
+    static std::vector<Parameter::Ptr> usedParameters() {
         return params().params;
     }
     static void descriptor(Extractor* e, const param::ParameterProvider& param) {

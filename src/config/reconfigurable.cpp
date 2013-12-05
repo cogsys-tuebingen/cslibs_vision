@@ -44,7 +44,7 @@ Reconfigurable::~Reconfigurable()
 
 void Reconfigurable::replaceTools(const Config& cfg)
 {
-    MatchablePose::IMAGE_PATH = cfg("db_imgs").as<std::string>();
+    MatchablePose::IMAGE_PATH = cfg("db_imgs")->as<std::string>();
 
     instance().latest_tools = ConfiguratedTools::create(cfg);
     instance().g_tools_replaced(cfg);

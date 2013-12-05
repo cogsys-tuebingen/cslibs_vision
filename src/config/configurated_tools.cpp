@@ -12,7 +12,7 @@ ConfiguratedTools::Ptr ConfiguratedTools::tool_cache;
 std::string ConfiguratedTools::tool_chache_hash;
 
 ConfiguratedTools::ConfiguratedTools(const Config& config)
-    : extractor(ExtractorFactory::create(config("keypointType"), config("descriptorType"), Config::instance())),
+    : extractor(ExtractorFactory::create(config("keypointType")->as<std::string>(), config("descriptorType")->as<std::string>(), Config::instance())),
       matcher(new Matcher(extractor->binary())), scorer(MatchScorerFactory::create(*matcher))
 {
     assert(extractor);

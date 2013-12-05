@@ -110,20 +110,16 @@ public:
     struct Params {
         template <typename T>
         T read(const param::ParameterProvider& param, const std::string& name) {
-            try {
-                return param(name);
-            } catch (const std::exception& e) {
-                BOOST_FOREACH(const param::Parameter& p, params) {
-                    if(p.name() == name) {
-                        return p.as<T>();
-                    }
+            BOOST_FOREACH(const param::Parameter::Ptr& p, params) {
+                if(p->name() == name) {
+                    return p->as<T>();
                 }
-
-                throw std::out_of_range(std::string("parameter ") + name + " doesn't exist.");
             }
+
+            throw std::out_of_range(std::string("parameter ") + name + " doesn't exist.");
         }
 
-        std::vector<param::Parameter> params;
+        std::vector<param::Parameter::Ptr> params;
     };
 
     class KeypointInitializer : public ExtractorInitializer {};
@@ -132,7 +128,7 @@ public:
     typedef typename KeypointInitializer::Call KeypointInit;
     typedef typename DescriptorInitializer::Call DescriptorInit;
 
-    typedef boost::function<std::vector<param::Parameter>() > ParameterFunction;
+    typedef boost::function<std::vector<param::Parameter::Ptr>() > ParameterFunction;
 
 private:
     /**
@@ -182,8 +178,8 @@ public:
         return available_keypoints;
     }
 
-    std::vector<param::Parameter> featureDetectorParameters(const std::string& keypoint);
-    std::vector<param::Parameter> featureDescriptorParameters(const std::string& keypoint);
+    std::vector<param::Parameter::Ptr> featureDetectorParameters(const std::string& keypoint);
+    std::vector<param::Parameter::Ptr> featureDescriptorParameters(const std::string& keypoint);
 
     /**
      * @brief descriptorExtractors get a container of all extractors

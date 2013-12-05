@@ -24,7 +24,7 @@ double MatchScorerClustering::calculateScore(Matchable& frame, Matchable& refere
 
     int k = 8;
     int scaling = 20;
-    HoughPeak<false,true> hough_imp(k, scaling, cfg("octaves"), reference, frame);
+    HoughPeak<false,true> hough_imp(k, scaling, cfg("octaves")->as<int>(), reference, frame);
     HoughAlgorithm& hough = hough_imp;
     hough.min_count = 8;
 

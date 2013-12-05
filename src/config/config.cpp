@@ -33,8 +33,8 @@ void Config::make_defaults()
 
 void Config::init()
 {
-    setDescriptorType(parameters["keypointType"]);
-    setKeypointType(parameters["descriptorType"]);
+    setDescriptorType(parameters["keypointType"].as<std::string>());
+    setKeypointType(parameters["descriptorType"].as<std::string>());
 
     std::string rabot;
     if(getenv("RABOT")) {
@@ -96,15 +96,15 @@ void Config::setDescriptorType(const std::string& type)
 std::string Config::getDescription() const
 {
     std::stringstream name;
-    name << parameters.at("keypointName").as<std::string>() << "_"
-         << parameters.at("descriptorName").as<std::string>() << "_"
-         << parameters.at("bin_count").as<int>() << "_"
-         << parameters.at("extractor_threshold").as<int>() << "_"
-         << parameters.at("min_points").as<int>() << "_"
-         << parameters.at("octaves").as<int>() << "_"
-         << parameters.at("matcher_threshold").as<double>() << "_"
-         << (parameters.at("use_pruning").as<bool>() ? "prune" : "noprune") << "_"
-         << (parameters.at("crop_test").as<bool>() ? "crop" : "nocrop");
+    name << parameters.at("keypointName")->as<std::string>() << "_"
+         << parameters.at("descriptorName")->as<std::string>() << "_"
+         << parameters.at("bin_count")->as<int>() << "_"
+         << parameters.at("extractor_threshold")->as<int>() << "_"
+         << parameters.at("min_points")->as<int>() << "_"
+         << parameters.at("octaves")->as<int>() << "_"
+         << parameters.at("matcher_threshold")->as<double>() << "_"
+         << (parameters.at("use_pruning")->as<bool>() ? "prune" : "noprune") << "_"
+         << (parameters.at("crop_test")->as<bool>() ? "crop" : "nocrop");
     return name.str();
 }
 
@@ -113,7 +113,7 @@ std::string Config::computeHash() const
     return getDescription();
 }
 
-Parameter& Config::getParameter(const std::string &name)
+Parameter::Ptr Config::getParameter(const std::string &name)
 {
     try {
         return parameters.at(name);
@@ -122,7 +122,7 @@ Parameter& Config::getParameter(const std::string &name)
     }
 }
 
-const Parameter& Config::getConstParameter(const std::string &name) const
+const Parameter::Ptr Config::getConstParameter(const std::string &name) const
 {
     try {
         return parameters.at(name);

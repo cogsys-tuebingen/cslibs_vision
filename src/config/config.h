@@ -61,8 +61,8 @@ public:
      * @param name
      * @return Parameter
      */
-    param::Parameter& getParameter(const std::string &name);
-    const param::Parameter& getConstParameter(const std::string &name) const;
+    param::Parameter::Ptr getParameter(const std::string &name);
+    const param::Parameter::Ptr getConstParameter(const std::string &name) const;
 
 protected:
     static impl::ConfigHolder& latest_config();
@@ -88,8 +88,8 @@ protected:
 
         ar & parameters;
 
-        setKeypointType(parameters["keypointType"]);
-        setDescriptorType(parameters["descriptorType"]);
+        setKeypointType(parameters["keypointType"].as<std::string>());
+        setDescriptorType(parameters["descriptorType"].as<std::string>());
     }
 };
 

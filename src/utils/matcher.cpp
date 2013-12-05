@@ -21,8 +21,8 @@ Matcher::Matcher(bool binary)
 
     const Config config = Config::instance();
 
-    min_points = config("min_points");
-    threshold = config("matcher_threshold");
+    min_points = config("min_points")->as<int>();
+    threshold = config("matcher_threshold")->as<double>();
 }
 
 double Matcher::matchFiltered(Matchable* a, const Matchable* b,
