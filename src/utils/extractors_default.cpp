@@ -176,8 +176,8 @@ struct Surf : public ExtractorManager::ExtractorInitializer {
             params.push_back(ParameterFactory::declare("extractor_threshold", 0, 5000, 1000, 1));
             params.push_back(ParameterFactory::declare("nOctaves", 0, 10, 4, 1));
             params.push_back(ParameterFactory::declare("nOctaveLayers", 0, 10, 2, 1));
-            params.push_back(ParameterFactory::declare("extended", true));
-            params.push_back(ParameterFactory::declare("upright", false));
+            params.push_back(ParameterFactory::declareBool("extended", true));
+            params.push_back(ParameterFactory::declareBool("upright", false));
         }
     };
     static KeyParams& params() {
@@ -228,8 +228,8 @@ struct Fast : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 200, 50, 1));
-            params.push_back(ParameterFactory::declare("nonmaxSuppression", true));
+            params.push_back(ParameterFactory::declareRange("extractor_threshold", 0, 200, 50, 1));
+            params.push_back(ParameterFactory::declareBool("nonmaxSuppression", true));
         }
     };
     static KeyParams& params() {
