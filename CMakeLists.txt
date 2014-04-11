@@ -7,7 +7,10 @@ find_package(catkin REQUIRED COMPONENTS cv_bridge utils_plugin utils_param)
 
 find_package(OpenCV REQUIRED)
 
-find_package(Eigen REQUIRED)
+find_package(Eigen)
+if(NOT ${Eigen_FOUND})
+  find_package(Eigen3 REQUIRED)
+endif()
 include_directories(${EIGEN_INCLUDE_DIRS})
 
 find_package(Boost REQUIRED)
