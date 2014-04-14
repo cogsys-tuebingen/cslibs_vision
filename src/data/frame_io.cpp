@@ -11,7 +11,7 @@
 #include <boost/filesystem.hpp>
 #include <fstream>
 #include <opencv2/opencv.hpp>
-#include "yaml-cpp/yaml.h"
+#include <utils_yaml/yamlplus.h>
 
 namespace bfs = boost::filesystem;
 
@@ -165,21 +165,21 @@ void FrameIO::readInfo(Frame* frame, const std::string& path)
     YAML::Parser parser(ifs);
     YAML::Node doc;
 
-    if(!parser.GetNextDocument(doc)) {
+    if(!getNextDocument(parser, doc)) {
         ERROR("cannot parse " << p);
         return;
     }
     double w,x,y,z, theta;
     doc >> w;
-    parser.GetNextDocument(doc);
+    getNextDocument(parser, doc);
     doc >> x;
-    parser.GetNextDocument(doc);
+    getNextDocument(parser, doc);
     doc >> y;
-    parser.GetNextDocument(doc);
+    getNextDocument(parser, doc);
     doc >> z;
-    parser.GetNextDocument(doc);
+    getNextDocument(parser, doc);
     doc >> theta;
-    parser.GetNextDocument(doc);
+    getNextDocument(parser, doc);
     doc >> frame->distance;
 
     frame->orientation = theta;
