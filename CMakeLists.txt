@@ -7,7 +7,7 @@ find_package(catkin REQUIRED COMPONENTS cv_bridge utils_plugin utils_param cmake
 
 find_package(OpenCV REQUIRED)
 
-find_package(Eigen)
+find_package(Eigen QUIET)
 if(NOT ${Eigen_FOUND})
   find_package(Eigen3 REQUIRED)
 endif()
