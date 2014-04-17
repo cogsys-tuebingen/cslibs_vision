@@ -6,6 +6,7 @@
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
+#include <stdexcept>
 
 using namespace cv;
 namespace ba = boost::accumulators;
@@ -32,7 +33,9 @@ int GRUSIG::descriptorType() const
 
 void GRUSIG::computeImpl( const Mat& image, std::vector<KeyPoint>& keypoints, Mat& descriptors) const
 {
-    assert(image.type() == CV_8UC3);
+    if(image.type() != CV_8UC3) {
+        throw std::runtime_error("image must be 8UC3");
+    }
 
     std::vector<KeyPoint>::iterator it;
     std::vector<KeyPoint>::iterator end = keypoints.end();
@@ -57,7 +60,9 @@ void GRUSIG::computeImpl( const Mat& image, std::vector<KeyPoint>& keypoints, Ma
 
 void GRUSIG::computeRow(const Mat& image, cv::Mat out, KeyPoint& kp) const
 {
-    assert(out.type() == CV_32FC1);
+    if(out.type() != CV_32FC1) {
+        throw std::runtime_error("output must be CV_32FC1");
+    }
 
     unsigned fromx = kp.pt.x - dim_;
     unsigned fromy = kp.pt.y - dim_;

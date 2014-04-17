@@ -22,14 +22,14 @@ struct Orb : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params {
         KeyParams() {
-            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 200, 50, 1));
-            params.push_back(ParameterFactory::declare("levels", 1, 20, 8, 1));
-            params.push_back(ParameterFactory::declare("edgeThreshold", 0, 64, 0, 1));
-            params.push_back(ParameterFactory::declare("first_level", 0, 8, 0, 1));
-            params.push_back(ParameterFactory::declare("WTA_K", 2, 4, 2, 1));
-            params.push_back(ParameterFactory::declare("patch_size", 0, 128, 31, 1));
+            add(ParameterFactory::declare("orb/extractor_threshold", 0, 200, 50, 1));
+            add(ParameterFactory::declare("orb/levels", 1, 20, 8, 1));
+            add(ParameterFactory::declare("orb/edgeThreshold", 0, 64, 0, 1));
+            add(ParameterFactory::declare("orb/first_level", 0, 8, 0, 1));
+            add(ParameterFactory::declare("orb/WTA_K", 2, 4, 2, 1));
+            add(ParameterFactory::declare("orb/patch_size", 0, 128, 31, 1));
 
-            params.push_back(ParameterFactory::declare("scale", 0.5, 2.0, 1.2, 0.05));
+            add(ParameterFactory::declare("orb/scale", 0.5, 2.0, 1.2, 0.05));
         }
     };
     static KeyParams& params() {
@@ -41,13 +41,13 @@ struct Orb : public ExtractorManager::ExtractorInitializer {
     }
 
     static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
-        int et          = params().read<int>   (param, "extractor_threshold");
-        double scale    = params().read<double>(param, "scale");
-        int levels      = params().read<int>   (param, "levels");
-        int edge        = params().read<int>   (param, "edgeThreshold");
-        int first_level = params().read<int>   (param, "first_level");
-        int WTA_K       = params().read<int>   (param, "WTA_K");
-        int patch_size  = params().read<int>   (param, "patch_size");
+        int et          = params().read<int>   (param, "orb/extractor_threshold");
+        double scale    = params().read<double>(param, "orb/scale");
+        int levels      = params().read<int>   (param, "orb/levels");
+        int edge        = params().read<int>   (param, "orb/edgeThreshold");
+        int first_level = params().read<int>   (param, "orb/first_level");
+        int WTA_K       = params().read<int>   (param, "orb/WTA_K");
+        int patch_size  = params().read<int>   (param, "orb/patch_size");
 
         e->keypoint = "orb";
         e->has_orientation = true;
@@ -75,9 +75,9 @@ struct Brisk : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params {
         KeyParams() {
-            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 1000, 50, 1));
-            params.push_back(ParameterFactory::declare("octaves", 0, 10, 4, 1));
-            params.push_back(ParameterFactory::declare("pattern_scale", 0.2, 10.0, 2.0, 0.1));
+            add(ParameterFactory::declare("brisk/extractor_threshold", 0, 1000, 50, 1));
+            add(ParameterFactory::declare("brisk/octaves", 0, 10, 4, 1));
+            add(ParameterFactory::declare("brisk/pattern_scale", 0.2, 10.0, 2.0, 0.1));
         }
     };
     static KeyParams& params() {
@@ -89,9 +89,9 @@ struct Brisk : public ExtractorManager::ExtractorInitializer {
     }
 
     static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
-        int et       = params().read<int>   (param, "extractor_threshold");
-        int octaves  = params().read<int>   (param, "octaves");
-        double scale = params().read<double>(param, "pattern_scale");
+        int et       = params().read<int>   (param, "brisk/extractor_threshold");
+        int octaves  = params().read<int>   (param, "brisk/octaves");
+        double scale = params().read<double>(param, "brisk/pattern_scale");
 
         e->keypoint = "brisk";
         e->has_orientation = true;
@@ -105,8 +105,8 @@ struct Brisk : public ExtractorManager::ExtractorInitializer {
     }
 
     static void descriptor(Extractor* e, const param::ParameterProvider& param) {
-        int et      = params().read<int> (param, "extractor_threshold");
-        int octaves = params().read<int> (param, "octaves");
+        int et      = params().read<int> (param, "brisk/extractor_threshold");
+        int octaves = params().read<int> (param, "brisk/octaves");
 
         e->is_binary = true;
         e->descriptor = "brisk";
@@ -124,11 +124,11 @@ struct Sift : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 1000, 50, 1));
-            params.push_back(ParameterFactory::declare("nOctaveLayers", 0, 5, 3, 1));
-            params.push_back(ParameterFactory::declare("contrastThreshold", 0.0, 1.0, 0.04, 0.005));
-            params.push_back(ParameterFactory::declare("edgeThreshold", 0.0, 100.0, 10.0, 1.0));
-            params.push_back(ParameterFactory::declare("sigma", 0.0, 5.0, 1.6, 0.01));
+            add(ParameterFactory::declare("sift/extractor_threshold", 0, 1000, 50, 1));
+            add(ParameterFactory::declare("sift/nOctaveLayers", 0, 5, 3, 1));
+            add(ParameterFactory::declare("sift/contrastThreshold", 0.0, 1.0, 0.04, 0.005));
+            add(ParameterFactory::declare("sift/edgeThreshold", 0.0, 100.0, 10.0, 1.0));
+            add(ParameterFactory::declare("sift/sigma", 0.0, 5.0, 1.6, 0.01));
         }
     };
     static KeyParams& params() {
@@ -139,11 +139,11 @@ struct Sift : public ExtractorManager::ExtractorInitializer {
         return params().params;
     }
     static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
-        int et                   = params().read<int> (param, "extractor_threshold");
-        int nOctaveLayers        = params().read<int> (param, "nOctaveLayers");
-        double contrastThreshold = params().read<double> (param, "contrastThreshold");
-        double edgeThreshold     = params().read<double> (param, "edgeThreshold");
-        double sigma             = params().read<double> (param, "sigma");
+        int et                   = params().read<int> (param, "sift/extractor_threshold");
+        int nOctaveLayers        = params().read<int> (param, "sift/nOctaveLayers");
+        double contrastThreshold = params().read<double> (param, "sift/contrastThreshold");
+        double edgeThreshold     = params().read<double> (param, "sift/edgeThreshold");
+        double sigma             = params().read<double> (param, "sift/sigma");
         e->keypoint = "sift";
         e->has_orientation = true;
         e->detector = new cv::SiftFeatureDetector(et * 0.002 / 3, nOctaveLayers, contrastThreshold, edgeThreshold, sigma);
@@ -173,11 +173,11 @@ struct Surf : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 5000, 1000, 1));
-            params.push_back(ParameterFactory::declare("nOctaves", 0, 10, 4, 1));
-            params.push_back(ParameterFactory::declare("nOctaveLayers", 0, 10, 2, 1));
-            params.push_back(ParameterFactory::declareBool("extended", true));
-            params.push_back(ParameterFactory::declareBool("upright", false));
+            add(ParameterFactory::declare("surf/extractor_threshold", 0, 5000, 1000, 1));
+            add(ParameterFactory::declare("surf/nOctaves", 0, 10, 4, 1));
+            add(ParameterFactory::declare("surf/nOctaveLayers", 0, 10, 2, 1));
+            add(ParameterFactory::declareBool("surf/extended", true));
+            add(ParameterFactory::declareBool("surf/upright", false));
         }
     };
     static KeyParams& params() {
@@ -189,11 +189,11 @@ struct Surf : public ExtractorManager::ExtractorInitializer {
     }
 
     static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
-        int et            = params().read<int>  (param, "extractor_threshold");
-        int nOctaves      = params().read<int>  (param, "nOctaves");
-        int nOctaveLayers = params().read<int>  (param, "nOctaveLayers");
-        bool extended     = params().read<bool> (param, "extended");
-        bool upright      = params().read<bool> (param, "upright");
+        int et            = params().read<int>  (param, "surf/extractor_threshold");
+        int nOctaves      = params().read<int>  (param, "surf/nOctaves");
+        int nOctaveLayers = params().read<int>  (param, "surf/nOctaveLayers");
+        bool extended     = params().read<bool> (param, "surf/extended");
+        bool upright      = params().read<bool> (param, "surf/upright");
 
         e->keypoint = "surf";
         e->has_orientation = true;
@@ -228,8 +228,8 @@ struct Fast : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(ParameterFactory::declareRange("extractor_threshold", 0, 200, 50, 1));
-            params.push_back(ParameterFactory::declareBool("nonmaxSuppression", true));
+            add(ParameterFactory::declareRange("fast/extractor_threshold", 0, 200, 50, 1));
+            add(ParameterFactory::declareBool("fast/nonmaxSuppression", true));
         }
     };
     static KeyParams& params() {
@@ -241,8 +241,8 @@ struct Fast : public ExtractorManager::ExtractorInitializer {
     }
 
     static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
-        int et                 = params().read<int>  (param, "extractor_threshold");
-        bool nonmaxSuppression = params().read<bool> (param, "nonmaxSuppression");
+        int et                 = params().read<int>  (param, "fast/extractor_threshold");
+        bool nonmaxSuppression = params().read<bool> (param, "fast/nonmaxSuppression");
         e->keypoint = "fast";
         e->has_orientation = false;
         e->detector = new cv::FastFeatureDetector(et, nonmaxSuppression);
@@ -259,15 +259,15 @@ struct Mser : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(ParameterFactory::declare("delta", 0, 50, 5, 1));
-            params.push_back(ParameterFactory::declare("minArea", 0, 1000, 60, 1));
-            params.push_back(ParameterFactory::declare("maxArea", 0, 30000, 14400, 1));
-            params.push_back(ParameterFactory::declare("maxVariation", 0.0, 1.0, 0.25, 0.01));
-            params.push_back(ParameterFactory::declare("minDiversity", 0.0, 1.0, 0.2, 0.01));
-            params.push_back(ParameterFactory::declare("maxEvolution", 0, 1000, 200, 1));
-            params.push_back(ParameterFactory::declare("areaThreshold", 0.0, 2.0, 1.01, 0.01));
-            params.push_back(ParameterFactory::declare("minMargin", 0.0, 0.1, 0.003, 0.001));
-            params.push_back(ParameterFactory::declare("edgeBlurSize", 0, 50, 5, 1));
+            add(ParameterFactory::declare("mser/delta", 0, 50, 5, 1));
+            add(ParameterFactory::declare("mser/minArea", 0, 1000, 60, 1));
+            add(ParameterFactory::declare("mser/maxArea", 0, 30000, 14400, 1));
+            add(ParameterFactory::declare("mser/maxVariation", 0.0, 1.0, 0.25, 0.01));
+            add(ParameterFactory::declare("mser/minDiversity", 0.0, 1.0, 0.2, 0.01));
+            add(ParameterFactory::declare("mser/maxEvolution", 0, 1000, 200, 1));
+            add(ParameterFactory::declare("mser/areaThreshold", 0.0, 2.0, 1.01, 0.01));
+            add(ParameterFactory::declare("mser/minMargin", 0.0, 0.1, 0.003, 0.001));
+            add(ParameterFactory::declare("mser/edgeBlurSize", 0, 50, 5, 1));
         }
     };
     static KeyParams& params() {
@@ -279,15 +279,15 @@ struct Mser : public ExtractorManager::ExtractorInitializer {
     }
 
     static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
-        int delta            = params().read<int>    (param, "delta");
-        int minArea          = params().read<int>    (param, "minArea");
-        int maxArea          = params().read<int>    (param, "maxArea");
-        double maxVariation  = params().read<double> (param, "maxVariation");
-        double minDiversity  = params().read<double> (param, "minDiversity");
-        int maxEvolution     = params().read<int>    (param, "maxEvolution");
-        double areaThreshold = params().read<double> (param, "areaThreshold");
-        double minMargin     = params().read<double> (param, "minMargin");
-        int edgeBlurSize     = params().read<int>    (param, "edgeBlurSize");
+        int delta            = params().read<int>    (param, "mser/delta");
+        int minArea          = params().read<int>    (param, "mser/minArea");
+        int maxArea          = params().read<int>    (param, "mser/maxArea");
+        double maxVariation  = params().read<double> (param, "mser/maxVariation");
+        double minDiversity  = params().read<double> (param, "mser/minDiversity");
+        int maxEvolution     = params().read<int>    (param, "mser/maxEvolution");
+        double areaThreshold = params().read<double> (param, "mser/areaThreshold");
+        double minMargin     = params().read<double> (param, "mser/minMargin");
+        int edgeBlurSize     = params().read<int>    (param, "mser/edgeBlurSize");
 
         e->keypoint = "mser";
         e->has_orientation = true;
@@ -305,7 +305,7 @@ struct Star : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 1000, 50, 1));
+            add(ParameterFactory::declare("star/extractor_threshold", 0, 1000, 50, 1));
         }
     };
     static KeyParams& params() {
@@ -317,7 +317,7 @@ struct Star : public ExtractorManager::ExtractorInitializer {
     }
 
     static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
-        int et          = params().read<int>   (param, "extractor_threshold");
+        int et          = params().read<int>   (param, "star/extractor_threshold");
 
         e->keypoint = "star";
         e->has_orientation = true;
@@ -334,7 +334,7 @@ struct Gftt : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 1000, 50, 1));
+            add(ParameterFactory::declare("gftt/extractor_threshold", 0, 1000, 50, 1));
         }
     };
     static KeyParams& params() {
@@ -346,7 +346,7 @@ struct Gftt : public ExtractorManager::ExtractorInitializer {
     }
 
     static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
-        int et          = params().read<int>   (param, "extractor_threshold");
+        int et          = params().read<int>   (param, "gftt/extractor_threshold");
 
         e->keypoint = "gftt";
         e->has_orientation = true;
@@ -363,7 +363,7 @@ struct GfttHarris : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(ParameterFactory::declare("extractor_threshold", 0, 1000, 50, 1));
+            add(ParameterFactory::declare("gftth/extractor_threshold", 0, 1000, 50, 1));
         }
     };
     static KeyParams& params() {
@@ -375,7 +375,7 @@ struct GfttHarris : public ExtractorManager::ExtractorInitializer {
     }
 
     static void keypoint(Extractor* e, const param::ParameterProvider& param, bool complete) {
-        int et          = params().read<int>   (param, "extractor_threshold");
+        int et          = params().read<int>   (param, "gftth/extractor_threshold");
 
         e->keypoint = "gftt_harris";
         e->has_orientation = true;
@@ -447,7 +447,7 @@ struct Grusig : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            params.push_back(ParameterFactory::declare("dimension", 1, 35, 10, 1));
+            add(ParameterFactory::declare("grusig/dimension", 1, 35, 10, 1));
         }
     };
     static KeyParams& params() {
@@ -458,7 +458,7 @@ struct Grusig : public ExtractorManager::ExtractorInitializer {
         return params().params;
     }
     static void descriptor(Extractor* e, const param::ParameterProvider& param) {
-        int dim = params().read<int>   (param, "dimension");
+        int dim = params().read<int>   (param, "grusig/dimension");
 
         e->is_binary = true;
         e->descriptor = "grusig";

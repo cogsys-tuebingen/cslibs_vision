@@ -119,6 +119,10 @@ public:
             throw std::out_of_range(std::string("parameter ") + name + " doesn't exist.");
         }
 
+        void add(param::Parameter::Ptr param) {
+            params.push_back(param);
+        }
+
         std::vector<param::Parameter::Ptr> params;
     };
 
