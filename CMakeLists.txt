@@ -20,6 +20,7 @@ catkin_package(
     INCLUDE_DIRS src
     LIBRARIES utils_vision logger
     CATKIN_DEPENDS utils_plugin utils_param
+    DEPENDS Eigen
 )
 
 include_directories(
