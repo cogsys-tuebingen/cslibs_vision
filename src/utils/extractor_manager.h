@@ -110,9 +110,14 @@ public:
     struct Params {
         template <typename T>
         T read(const param::ParameterProvider& param, const std::string& name) {
-            BOOST_FOREACH(const param::Parameter::Ptr& p, params) {
-                if(p->name() == name) {
-                    return p->as<T>();
+            try {
+                param::Parameter::Ptr p = param.getConstParameter(name);
+                return p->as<T>();
+            } catch(const std::exception& e) {
+                BOOST_FOREACH(const param::Parameter::Ptr& p, params) {
+                    if(p->name() == name) {
+                        return p->as<T>();
+                    }
                 }
             }
 
