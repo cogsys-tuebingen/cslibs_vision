@@ -2,8 +2,8 @@
 #define EXTRACTORS_DEFAULT_HPP
 
 /// COMPONENT
-#include "extractor_manager.h"
-#include "grusig_descriptor.h"
+#include <utils_vision/utils/extractor_manager.h>
+#include <utils_vision/utils/grusig_descriptor.h>
 
 /// PROJECT
 #include <utils_param/parameter_factory.h>

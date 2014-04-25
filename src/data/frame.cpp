@@ -1,8 +1,8 @@
 /// HEADER
-#include "frame.h"
+#include <utils_vision/data/frame.h>
 
 /// PROJECT
-#include <data/frame_io.h>
+#include <utils_vision/data/frame_io.h>
 
 /// SYSTEM
 #include <boost/thread/locks.hpp>

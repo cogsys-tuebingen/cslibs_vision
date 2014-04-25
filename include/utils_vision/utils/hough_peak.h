@@ -9,7 +9,7 @@
 #define HOUGH_PEAK_H
 
 /// PROJECT
-#include <data/frame.h>
+#include <utils_vision/data/frame.h>
 
 /// SYSTEM
 #include <opencv2/opencv.hpp>

@@ -1,5 +1,5 @@
 /// HEADER
-#include "types.h"
+#include <utils_vision/config/types.h>
 
 /// SYSTEM
 #include <algorithm>

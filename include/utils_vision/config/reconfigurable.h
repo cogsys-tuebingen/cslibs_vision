@@ -2,11 +2,11 @@
 #define RECONFIGURABLE_H
 
 /// COMPONENT
-#include "config.h"
-#include "configurated_tools.h"
+#include <utils_vision/config/config.h>
+#include <utils_vision/config/configurated_tools.h>
 
 /// PROJECT
-#include <common/global.hpp>
+#include <utils_vision/common/global.hpp>
 
 /// SYSTEM
 #include <boost/signals2.hpp>

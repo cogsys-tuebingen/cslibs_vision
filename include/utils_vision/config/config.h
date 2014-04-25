@@ -7,7 +7,7 @@
 #include <utils_param/parameter_map.h>
 
 /// PROJECT
-#include <common/global.hpp>
+#include <utils_vision/common/global.hpp>
 
 /// SYSTEM
 #include <boost/serialization/split_member.hpp>

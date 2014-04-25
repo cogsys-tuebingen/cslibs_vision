@@ -1,12 +1,12 @@
 /// HEADER
-#include "configurated_tools.h"
+#include <utils_vision/config/configurated_tools.h>
 
 /// COMPONENT
-#include "config.h"
+#include <utils_vision/config/config.h>
 
 /// PROJECT
-#include <utils/extractor_factory.h>
-#include <utils/match_scorer_factory.h>
+#include <utils_vision/utils/extractor_factory.h>
+#include <utils_vision/utils/match_scorer_factory.h>
 
 ConfiguratedTools::Ptr ConfiguratedTools::tool_cache;
 std::string ConfiguratedTools::tool_chache_hash;

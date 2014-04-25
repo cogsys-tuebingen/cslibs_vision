@@ -2,7 +2,7 @@
 #define DEBUG_PAINTER_H
 
 /// PROJECT
-#include <data/frame.h>
+#include <utils_vision/data/frame.h>
 
 /// SYSTEM
 #include <boost/shared_ptr.hpp>

@@ -1,11 +1,11 @@
 /// HEADER
-#include "frame_io.h"
+#include <utils_vision/data/frame_io.h>
 
 /// COMPONENT
-#include "painter.h"
+#include <utils_vision/data/painter.h>
 
 /// PROJECT
-#include <common/global.hpp>
+#include <utils_vision/common/global.hpp>
 
 /// SYSTEM
 #include <boost/filesystem.hpp>

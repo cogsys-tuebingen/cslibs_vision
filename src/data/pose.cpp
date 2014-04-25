@@ -1,4 +1,5 @@
-#include "pose.h"
+/// HEADER
+#include <utils_vision/data/pose.h>
 
 Pose::Pose()
 {

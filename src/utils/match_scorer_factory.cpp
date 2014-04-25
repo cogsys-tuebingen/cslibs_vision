@@ -1,13 +1,13 @@
 /// HEADER
-#include "match_scorer_factory.h"
+#include <utils_vision/utils/match_scorer_factory.h>
 
 /// COMPONENT
-#include "match_scorer_homography.h"
-#include "match_scorer_clustering.h"
-#include "match_scorer_reprojection.h"
+#include <utils_vision/utils/match_scorer_homography.h>
+#include <utils_vision/utils/match_scorer_clustering.h>
+#include <utils_vision/utils/match_scorer_reprojection.h>
 
 /// PROJECT
-#include <common/global.hpp>
+#include <utils_vision/common/global.hpp>
 
 MatchScorerFactory::Scorer::Type MatchScorerFactory::create_type = MatchScorerFactory::Scorer::CLUSTERING;
 

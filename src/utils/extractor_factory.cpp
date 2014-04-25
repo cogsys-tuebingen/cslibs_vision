@@ -1,8 +1,8 @@
 /// HEADER
-#include "extractor_factory.h"
+#include <utils_vision/utils/extractor_factory.h>
 
 /// COMPONENT
-#include "extractor_manager.h"
+#include <utils_vision/utils/extractor_manager.h>
 
 ExtractorFactory::ExtractorFactory()
     : manager(csapex::ExtractorManager::instance())

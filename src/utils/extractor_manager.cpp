@@ -1,9 +1,9 @@
 /// HEADER
-#include "extractor_manager.h"
+#include <utils_vision/utils/extractor_manager.h>
 
 /// COMPONENT
-#include "extractor_factory.h"
-#include <common/global.hpp>
+#include <utils_vision/utils/extractor_factory.h>
+#include <utils_vision/common/global.hpp>
 
 /// SYSTEM
 #include <algorithm>

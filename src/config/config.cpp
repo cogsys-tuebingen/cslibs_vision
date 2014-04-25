@@ -1,5 +1,5 @@
 /// HEADER
-#include "config.h"
+#include <utils_vision/config/config.h>
 
 /// SYSTEM
 #include <sstream>

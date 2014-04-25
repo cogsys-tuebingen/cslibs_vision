@@ -1,8 +1,8 @@
 /// HEADER
-#include "reconfigurable.h"
+#include <utils_vision/config/reconfigurable.h>
 
 /// PROJECT
-#include <data/matchable_pose.h>
+#include <utils_vision/data/matchable_pose.h>
 
 Reconfigurable::Reconfigurable()
     : config(Config::instance()), tools(instance().latest_tools)

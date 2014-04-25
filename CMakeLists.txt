@@ -13,28 +13,26 @@ if(NOT ${Eigen_FOUND})
 endif()
 include_directories(${EIGEN_INCLUDE_DIRS})
 
-find_package(Boost REQUIRED)
 find_package(Boost COMPONENTS program_options serialization REQUIRED)
 
 catkin_package(
-    INCLUDE_DIRS src
+    INCLUDE_DIRS include
     LIBRARIES utils_vision logger
     CATKIN_DEPENDS utils_plugin utils_param
     DEPENDS Eigen
 )
 
-include_directories(
+include_directories(include
     ${catkin_INCLUDE_DIRS}
-    src
 )
 
 ##### COMMON
 set(GLOBALS
-    src/common/global.hpp)
+    include/utils_vision/common/global.hpp)
 
 ##### LOGGER
 add_library(logger
-    src/common/global.hpp
+    include/utils_vision/common/global.hpp
     src/common/logger.cpp)
 
 ##### CORE
@@ -64,10 +62,26 @@ add_library(utils_vision
     src/utils/match_scorer_clustering.cpp
     src/utils/match_scorer_reprojection.cpp
     src/utils/match_scorer_factory.cpp
-    src/utils/opencv_utils.hpp
+    include/utils_vision/utils/opencv_utils.hpp
     src/utils/grusig_descriptor.cpp
     src/utils/rectangle_cluster.cpp
     ${QT_UTIL}
     ${GLOBALS})
 target_link_libraries(utils_vision yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
 target_link_libraries(utils_vision logger)
+
+
+
+install(TARGETS utils_vision
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(TARGETS logger
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(DIRECTORY include/utils_vision
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+

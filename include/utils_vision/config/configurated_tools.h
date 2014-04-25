@@ -5,10 +5,10 @@
 #include "config.h"
 
 /// PROJECT
-#include <common/global.hpp>
-#include <utils/extractor.h>
-#include <utils/matcher.h>
-#include <utils/match_scorer.h>
+#include <utils_vision/common/global.hpp>
+#include <utils_vision/utils/extractor.h>
+#include <utils_vision/utils/matcher.h>
+#include <utils_vision/utils/match_scorer.h>
 
 /// SYSTEM
 #include <boost/thread.hpp>
