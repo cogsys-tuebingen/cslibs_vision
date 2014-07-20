@@ -5,10 +5,6 @@
 #include "extractor.h"
 #include <utils_param/parameter_provider.h>
 
-/// PROJECT
-#include <utils_plugin/singleton.hpp>
-#include <utils_plugin/constructor.hpp>
-
 /// SYSTEM
 #include <opencv2/opencv.hpp>
 #include <boost/function.hpp>
@@ -78,15 +74,19 @@ namespace csapex
  * @brief The ExtractorManager class manages all instances of feature detectors and descriptor extractors.
  *        It functions like a proxy to the underlying singleton classes.
  */
-class ExtractorManager : public Singleton<ExtractorManager>
+class ExtractorManager : public boost::noncopyable
 {
-    friend class Singleton<ExtractorManager>;
+public:
+    static ExtractorManager& instance() {
+        static ExtractorManager inst;
+        return inst;
+    }
 
 public:
     /**
      * @brief The ExtractorInitializer
      */
-    struct ExtractorInitializer : public Constructor {
+    struct ExtractorInitializer/* : public Constructor*/ {
         typedef boost::function<void(Extractor*, const param::ParameterProvider&, bool)> Call;
 
         void operator()(Extractor* r, const param::ParameterProvider& param, bool complete = false) const {
@@ -103,7 +103,27 @@ public:
             constructor = c;
         }
 
+
+        std::string getType() const {
+            return type;
+        }
+
+        void setType(const std::string& n) {
+            type = n;
+        }
+
+        std::string getDescription() const {
+            return descr;
+        }
+
+        void setDescription(const std::string& n) {
+            descr = n;
+        }
+
+
     private:
+        std::string type;
+        std::string descr;
         Call constructor;
     };
 

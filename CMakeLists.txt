@@ -3,7 +3,7 @@ project(utils_vision)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-find_package(catkin REQUIRED COMPONENTS cv_bridge utils_plugin utils_param cmake_modules)
+find_package(catkin REQUIRED COMPONENTS cv_bridge utils_param cmake_modules)
 
 find_package(OpenCV REQUIRED)
 
@@ -18,7 +18,7 @@ find_package(Boost COMPONENTS program_options serialization REQUIRED)
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES utils_vision logger
-    CATKIN_DEPENDS utils_plugin utils_param
+    CATKIN_DEPENDS utils_param
     DEPENDS Eigen
 )
 
