@@ -3,8 +3,6 @@
 #include <opencv2/opencv.hpp>
 #include <boost/shared_ptr.hpp>
 
-using namespace cv;
-
 namespace utils_vision {
 
 class LocalPattern {
@@ -20,30 +18,35 @@ public:
     typedef boost::shared_ptr<LBP> Ptr;
 
     LBP() :
-        histogram(cv::Mat_<int>(1, 256, 0))
+        histogram_(cv::Mat_<int>(1, 256, 0))
     {
     }
 
     double operator - (const LBP &other) const
     {
         double sum = 0;
-        for(int i = 0 ; i < histogram.rows ; ++i) {
-            int diff = histogram.at<int>(i) - other.histogram.at<int>(i);
+        for(int i = 0 ; i < histogram_.rows ; ++i) {
+            int diff = histogram_.at<int>(i) - other.histogram_.at<int>(i);
             sum += diff * diff;
         }
         return std::sqrt(sum);
     }
 
-    cv::Mat getHistogram()
+    void getHistogram(cv::Mat &histogram)
     {
-        return histogram.clone();
+        histogram_.copyTo(histogram);
+    }
+
+    void getHistogram(std::vector<int> &_histogram)
+    {
+        histogram_.copyTo(_histogram);
     }
 
     template <typename _Tp>
-    void stdExtraction(InputArray _src, const _Tp k = 0) {
-        histogram.setTo(0);
+    void stdExtraction(cv::InputArray _src, const _Tp k = 0) {
+        histogram_.setTo(0);
         // get matrices
-        Mat src = _src.getMat();
+        cv::Mat src = _src.getMat();
         // calculate patterns
         for(int i=1;i<src.rows-1;++i) {
             for(int j=1;j<src.cols-1;++j) {
@@ -59,15 +62,16 @@ public:
                 histgram_pos += (src.at<_Tp>(i+1,j-1)   >= center) << 1;
                 histgram_pos += (src.at<_Tp>(i,j-1)     >= center) << 0;
 
-                histogram.at<int>(histgram_pos)++;
+                histogram_.at<int>(histgram_pos)++;
             }
         }
     }
 
     template <typename _Tp>
-    inline void extExtraction(InputArray _src, const int radius, const int neighbors, const _Tp k = 0) {
+    inline void extExtraction(cv::InputArray _src, const int radius, const int neighbors, const _Tp k = 0) {
+        histogram_.setTo(0);
         //get matrices
-        Mat src = _src.getMat();
+        cv::Mat src = _src.getMat();
         for(int n=0; n<neighbors; n++) {
             // sample points
             float x = static_cast<float>(-radius * sin(2.0*CV_PI*n/static_cast<float>(neighbors)));
@@ -94,7 +98,7 @@ public:
                     _Tp center = src.at<_Tp>(i,j) + k;
                     unsigned char histogram_pos = 0;
                     histogram_pos += (t >= center) << n;
-                    histogram.at<int>(histogram_pos)++;
+                    histogram_.at<int>(histogram_pos)++;
                 }
             }
         }
@@ -102,7 +106,7 @@ public:
 
 
 private:
-    cv::Mat histogram;
+    cv::Mat histogram_;
 };
 
 class LTP  : public LocalPattern
@@ -127,22 +131,49 @@ public :
         return std::sqrt(sum);
     }
 
-    cv::Mat getPos()
+    void getPos(cv::Mat &pos)
     {
-        return pos_.clone();
+        pos_.copyTo(pos);
     }
 
-    cv::Mat getNeg()
+    void getNeg(cv::Mat &neg)
     {
-        return neg_.clone();
+        neg_.copyTo(neg);
     }
+
+    void getPos(std::vector<int> &pos)
+    {
+        pos_.copyTo(pos);
+    }
+
+    void getNeg(std::vector<int> &neg)
+    {
+        neg_.copyTo(neg);
+    }
+
+    void getAll(std::vector<int> &all)
+    {
+        all.clear();
+        all.insert(all.end(), pos_.begin<int>(), pos_.end<int>());
+        all.insert(all.end(), neg_.begin<int>(), neg_.end<int>());
+    }
+
+    void get(cv::Mat &all)
+    {
+        all = cv::Mat(1, pos_.cols + neg_.cols, CV_32SC1, cv::Scalar::all(0));
+        cv::Mat pos(all.colRange(0, pos_.cols - 1));
+        cv::Mat neg(all.colRange(pos_.cols, pos_.cols + neg_.cols - 1));
+        getPos(pos);
+        getNeg(neg);
+    }
+
 
     template <typename _Tp>
-    void stdExtraction(InputArray _src, const _Tp k) {
+    void stdExtraction(cv::InputArray _src, const _Tp k) {
         pos_.setTo(0);
         neg_.setTo(0);
         // get matrices
-        Mat src = _src.getMat();
+        cv::Mat src = _src.getMat();
         // calculate patterns
         for(int i=1;i<src.rows-1;++i) {
             for(int j=1;j<src.cols-1;++j) {
@@ -176,9 +207,9 @@ public :
     }
 
     template <typename _Tp>
-    inline void extExtraction(InputArray _src, const int radius, const int neighbors, const _Tp k) {
+    inline void extExtraction(cv::InputArray _src, const int radius, const int neighbors, const _Tp k) {
         //get matrices
-        Mat src = _src.getMat();
+        cv::Mat src = _src.getMat();
         for(int n=0; n<neighbors; n++) {
             // sample points
             float x = static_cast<float>(-radius * sin(2.0*CV_PI*n/static_cast<float>(neighbors)));
