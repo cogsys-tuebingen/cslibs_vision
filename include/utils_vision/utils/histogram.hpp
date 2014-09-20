@@ -392,7 +392,7 @@ inline void find_maxima1D(const cv::Mat &src,
                           std::vector<Maximum> &dst)
 {
     assert(src.cols == 1);
-    if(k > src.rows)
+    if((int) k > src.rows)
         return;
 
     /// upper
@@ -410,7 +410,7 @@ inline void find_maxima1D(const cv::Mat &src,
     }
 
     /// lower
-    for(unsigned int i = src.rows - 1 - k ; i < src.rows ; ++i) {
+    for(unsigned int i = src.rows - 1 - k ; (int) i < src.rows ; ++i) {
         if(is_max<T>(src, i - k , i , src.rows - 1, thresh)) {
             dst.push_back(std::make_pair<uint, float>(i, src.at<T>(i)));
         }
