@@ -11,7 +11,7 @@
 #include <boost/filesystem.hpp>
 #include <fstream>
 #include <opencv2/opencv.hpp>
-#include <utils_yaml/yamlplus.h>
+#include <yaml-cpp/yaml.h>
 
 namespace bfs = boost::filesystem;
 
@@ -165,24 +165,26 @@ void FrameIO::readInfo(Frame* frame, const std::string& path)
     YAML::Parser parser(ifs);
     YAML::Node doc;
 
-    if(!getNextDocument(parser, doc)) {
-        ERROR("cannot parse " << p);
-        return;
-    }
-    double w,x,y,z, theta;
-    doc >> w;
-    getNextDocument(parser, doc);
-    doc >> x;
-    getNextDocument(parser, doc);
-    doc >> y;
-    getNextDocument(parser, doc);
-    doc >> z;
-    getNextDocument(parser, doc);
-    doc >> theta;
-    getNextDocument(parser, doc);
-    doc >> frame->distance;
+    throw std::runtime_error("FrameIO::readInfo not implemented");
+    // TODO: reimplement
+//    if(!getNextDocument(parser, doc)) {
+//        ERROR("cannot parse " << p);
+//        return;
+//    }
+//    double w,x,y,z, theta;
+//    doc >> w;
+//    getNextDocument(parser, doc);
+//    doc >> x;
+//    getNextDocument(parser, doc);
+//    doc >> y;
+//    getNextDocument(parser, doc);
+//    doc >> z;
+//    getNextDocument(parser, doc);
+//    doc >> theta;
+//    getNextDocument(parser, doc);
+//    doc >> frame->distance;
 
-    frame->orientation = theta;
+//    frame->orientation = theta;
 }
 
 void FrameIO::renderMasked(Frame* frame, const std::string& path)
