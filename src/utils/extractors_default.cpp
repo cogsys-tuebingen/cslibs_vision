@@ -22,14 +22,14 @@ struct Orb : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params {
         KeyParams() {
-            add(ParameterFactory::declare("orb/extractor_threshold", 0, 200, 50, 1));
-            add(ParameterFactory::declare("orb/levels", 1, 20, 8, 1));
-            add(ParameterFactory::declare("orb/edgeThreshold", 0, 64, 0, 1));
-            add(ParameterFactory::declare("orb/first_level", 0, 8, 0, 1));
-            add(ParameterFactory::declare("orb/WTA_K", 2, 4, 2, 1));
-            add(ParameterFactory::declare("orb/patch_size", 0, 128, 31, 1));
+            add(ParameterFactory::declareRange("orb/extractor_threshold", 0, 200, 50, 1));
+            add(ParameterFactory::declareRange("orb/levels", 1, 20, 8, 1));
+            add(ParameterFactory::declareRange("orb/edgeThreshold", 0, 64, 0, 1));
+            add(ParameterFactory::declareRange("orb/first_level", 0, 8, 0, 1));
+            add(ParameterFactory::declareRange("orb/WTA_K", 2, 4, 2, 1));
+            add(ParameterFactory::declareRange("orb/patch_size", 0, 128, 31, 1));
 
-            add(ParameterFactory::declare("orb/scale", 0.5, 2.0, 1.2, 0.05));
+            add(ParameterFactory::declareRange("orb/scale", 0.5, 2.0, 1.2, 0.05));
         }
     };
     static KeyParams& params() {
@@ -75,9 +75,9 @@ struct Brisk : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params {
         KeyParams() {
-            add(ParameterFactory::declare("brisk/extractor_threshold", 0, 1000, 50, 1));
-            add(ParameterFactory::declare("brisk/octaves", 0, 10, 4, 1));
-            add(ParameterFactory::declare("brisk/pattern_scale", 0.2, 10.0, 2.0, 0.1));
+            add(ParameterFactory::declareRange("brisk/extractor_threshold", 0, 1000, 50, 1));
+            add(ParameterFactory::declareRange("brisk/octaves", 0, 10, 4, 1));
+            add(ParameterFactory::declareRange("brisk/pattern_scale", 0.2, 10.0, 2.0, 0.1));
         }
     };
     static KeyParams& params() {
@@ -124,11 +124,11 @@ struct Sift : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            add(ParameterFactory::declare("sift/extractor_threshold", 0, 1000, 50, 1));
-            add(ParameterFactory::declare("sift/nOctaveLayers", 0, 5, 3, 1));
-            add(ParameterFactory::declare("sift/contrastThreshold", 0.0, 1.0, 0.04, 0.005));
-            add(ParameterFactory::declare("sift/edgeThreshold", 0.0, 100.0, 10.0, 1.0));
-            add(ParameterFactory::declare("sift/sigma", 0.0, 5.0, 1.6, 0.01));
+            add(ParameterFactory::declareRange("sift/extractor_threshold", 0, 1000, 50, 1));
+            add(ParameterFactory::declareRange("sift/nOctaveLayers", 0, 5, 3, 1));
+            add(ParameterFactory::declareRange("sift/contrastThreshold", 0.0, 1.0, 0.04, 0.005));
+            add(ParameterFactory::declareRange("sift/edgeThreshold", 0.0, 100.0, 10.0, 1.0));
+            add(ParameterFactory::declareRange("sift/sigma", 0.0, 5.0, 1.6, 0.01));
         }
     };
     static KeyParams& params() {
@@ -173,9 +173,9 @@ struct Surf : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            add(ParameterFactory::declare("surf/extractor_threshold", 0, 5000, 1000, 1));
-            add(ParameterFactory::declare("surf/nOctaves", 0, 10, 4, 1));
-            add(ParameterFactory::declare("surf/nOctaveLayers", 0, 10, 2, 1));
+            add(ParameterFactory::declareRange("surf/extractor_threshold", 0, 5000, 1000, 1));
+            add(ParameterFactory::declareRange("surf/nOctaves", 0, 10, 4, 1));
+            add(ParameterFactory::declareRange("surf/nOctaveLayers", 0, 10, 2, 1));
             add(ParameterFactory::declareBool("surf/extended", true));
             add(ParameterFactory::declareBool("surf/upright", false));
         }
@@ -259,15 +259,15 @@ struct Mser : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            add(ParameterFactory::declare("mser/delta", 0, 50, 5, 1));
-            add(ParameterFactory::declare("mser/minArea", 0, 1000, 60, 1));
-            add(ParameterFactory::declare("mser/maxArea", 0, 30000, 14400, 1));
-            add(ParameterFactory::declare("mser/maxVariation", 0.0, 1.0, 0.25, 0.01));
-            add(ParameterFactory::declare("mser/minDiversity", 0.0, 1.0, 0.2, 0.01));
-            add(ParameterFactory::declare("mser/maxEvolution", 0, 1000, 200, 1));
-            add(ParameterFactory::declare("mser/areaThreshold", 0.0, 2.0, 1.01, 0.01));
-            add(ParameterFactory::declare("mser/minMargin", 0.0, 0.1, 0.003, 0.001));
-            add(ParameterFactory::declare("mser/edgeBlurSize", 0, 50, 5, 1));
+            add(ParameterFactory::declareRange("mser/delta", 0, 50, 5, 1));
+            add(ParameterFactory::declareRange("mser/minArea", 0, 1000, 60, 1));
+            add(ParameterFactory::declareRange("mser/maxArea", 0, 30000, 14400, 1));
+            add(ParameterFactory::declareRange("mser/maxVariation", 0.0, 1.0, 0.25, 0.01));
+            add(ParameterFactory::declareRange("mser/minDiversity", 0.0, 1.0, 0.2, 0.01));
+            add(ParameterFactory::declareRange("mser/maxEvolution", 0, 1000, 200, 1));
+            add(ParameterFactory::declareRange("mser/areaThreshold", 0.0, 2.0, 1.01, 0.01));
+            add(ParameterFactory::declareRange("mser/minMargin", 0.0, 0.1, 0.003, 0.001));
+            add(ParameterFactory::declareRange("mser/edgeBlurSize", 0, 50, 5, 1));
         }
     };
     static KeyParams& params() {
@@ -305,7 +305,7 @@ struct Star : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            add(ParameterFactory::declare("star/extractor_threshold", 0, 1000, 50, 1));
+            add(ParameterFactory::declareRange("star/extractor_threshold", 0, 1000, 50, 1));
         }
     };
     static KeyParams& params() {
@@ -334,7 +334,7 @@ struct Gftt : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            add(ParameterFactory::declare("gftt/extractor_threshold", 0, 1000, 50, 1));
+            add(ParameterFactory::declareRange("gftt/extractor_threshold", 0, 1000, 50, 1));
         }
     };
     static KeyParams& params() {
@@ -363,7 +363,7 @@ struct GfttHarris : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            add(ParameterFactory::declare("gftth/extractor_threshold", 0, 1000, 50, 1));
+            add(ParameterFactory::declareRange("gftth/extractor_threshold", 0, 1000, 50, 1));
         }
     };
     static KeyParams& params() {
@@ -447,7 +447,7 @@ struct Grusig : public ExtractorManager::ExtractorInitializer {
 
     struct KeyParams : public ExtractorManager::Params  {
         KeyParams() {
-            add(ParameterFactory::declare("grusig/dimension", 1, 35, 10, 1));
+            add(ParameterFactory::declareRange("grusig/dimension", 1, 35, 10, 1));
         }
     };
     static KeyParams& params() {
