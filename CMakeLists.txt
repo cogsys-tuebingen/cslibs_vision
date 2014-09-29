@@ -65,6 +65,7 @@ add_library(utils_vision
     include/utils_vision/utils/opencv_utils.hpp
     src/utils/grusig_descriptor.cpp
     src/utils/rectangle_cluster.cpp
+    src/utils/camera_calibration.cpp
     ${QT_UTIL}
     ${GLOBALS})
 target_link_libraries(utils_vision yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
