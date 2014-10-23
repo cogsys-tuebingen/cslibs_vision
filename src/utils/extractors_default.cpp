@@ -9,7 +9,10 @@
 #include <utils_param/parameter_factory.h>
 
 /// SYSTEM
+#include <opencv2/features2d/features2d.hpp>
+#if CV_NON_FREE
 #include <opencv2/nonfree/nonfree.hpp>
+#endif
 #include <boost/bind.hpp>
 
 using namespace csapex;
@@ -119,6 +122,7 @@ BOOST_STATIC_ASSERT(DetectorTraits<Brisk>::HasKeypoint);
 BOOST_STATIC_ASSERT(DetectorTraits<Brisk>::HasDescriptor);
 
 
+#if CV_NON_FREE
 struct Sift : public ExtractorManager::ExtractorInitializer {
     EXTRACTOR_IMPLEMENTATION
 
@@ -165,8 +169,6 @@ struct Sift : public ExtractorManager::ExtractorInitializer {
 REGISTER_FEATURE_DETECTOR(Sift, SIFT);
 BOOST_STATIC_ASSERT(DetectorTraits<Sift>::HasKeypoint);
 BOOST_STATIC_ASSERT(DetectorTraits<Sift>::HasDescriptor);
-
-
 
 struct Surf : public ExtractorManager::ExtractorInitializer {
     EXTRACTOR_IMPLEMENTATION
@@ -216,7 +218,7 @@ struct Surf : public ExtractorManager::ExtractorInitializer {
 REGISTER_FEATURE_DETECTOR(Surf, SURF);
 BOOST_STATIC_ASSERT(DetectorTraits<Surf>::HasKeypoint);
 BOOST_STATIC_ASSERT(DetectorTraits<Surf>::HasDescriptor);
-
+#endif
 
 
 

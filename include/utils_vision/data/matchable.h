@@ -7,11 +7,7 @@
 /// SYSTEM
 #include <opencv2/core/core.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
-
-#if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >= 4
-#include <opencv2/nonfree/nonfree.hpp>
-#endif
-
+#include <opencv2/features2d/features2d.hpp>
 /**
  * @brief The Matchable class is a base class for everything that has keypoints and descriptors
  */

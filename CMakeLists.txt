@@ -6,6 +6,7 @@ set(CMAKE_BUILD_TYPE Debug)
 find_package(catkin REQUIRED COMPONENTS cv_bridge utils_param cmake_modules)
 
 find_package(OpenCV REQUIRED)
+message("Found OpenCV ${OpenCV_VERSION}")
 
 find_package(Eigen QUIET)
 if(NOT ${Eigen_FOUND})
@@ -25,6 +26,20 @@ catkin_package(
 include_directories(include
     ${catkin_INCLUDE_DIRS}
 )
+
+set(NONFREE_FOUND false)
+foreach(dir ${OpenCV_INCLUDE_DIRS})
+    if(EXISTS "${dir}/opencv2/nonfree/")
+        set(NONFREE_FOUND true)
+    endif()
+endforeach()
+
+if(${NONFREE_FOUND})
+    add_definitions("-DCV_NON_FREE=1")
+else()
+    add_definitions("-DCV_NON_FREE=0")
+    message("OpenCV nonfree was not found, SIFT and SURF will not be available. If you need them, compile OpenCV from source and remove CMakeCache.txt!")
+endif()
 
 ##### COMMON
 set(GLOBALS
