@@ -10,6 +10,7 @@
 #include <boost/function.hpp>
 #include <boost/foreach.hpp>
 #include <map>
+#include <sys/types.h>
 
 namespace csapex
 {
@@ -22,10 +23,10 @@ class DetectorTraits
         char dummy[2];
     };
 
-    template <typename Class> static Small testKeypoint(typeof(&Class::keypoint)) ;
+    template <typename Class> static Small testKeypoint(__typeof__(&Class::keypoint)) ;
     template <typename Class> static Big testKeypoint(...);
 
-    template <typename Class> static Small testDescriptor(typeof(&Class::descriptor)) ;
+    template <typename Class> static Small testDescriptor(__typeof__(&Class::descriptor)) ;
     template <typename Class> static Big testDescriptor(...);
 
 

@@ -398,21 +398,21 @@ inline void find_maxima1D(const cv::Mat &src,
     /// upper
     for(unsigned int i = 0 ; i < k ; ++i) {
         if(is_max<T>(src, 0, i, i + k, thresh)) {
-            dst.push_back(std::make_pair<uint, float>(i, src.at<T>(i)));
+            dst.push_back(std::make_pair(i, src.at<T>(i)));
         }
     }
 
     /// inner
     for(unsigned int i = k ; i < src.rows - k ; ++i) {
         if(is_max<T>(src, i - k, i , i + k, thresh)) {
-            dst.push_back(std::make_pair<uint, float>(i, src.at<T>(i)));
+            dst.push_back(std::make_pair(i, src.at<T>(i)));
         }
     }
 
     /// lower
     for(unsigned int i = src.rows - 1 - k ; (int) i < src.rows ; ++i) {
         if(is_max<T>(src, i - k , i , src.rows - 1, thresh)) {
-            dst.push_back(std::make_pair<uint, float>(i, src.at<T>(i)));
+            dst.push_back(std::make_pair(i, src.at<T>(i)));
         }
     }
 }
