@@ -33,6 +33,11 @@ struct Orb : public ExtractorManager::ExtractorInitializer {
             add(ParameterFactory::declareRange("orb/patch_size", 0, 128, 31, 1));
 
             add(ParameterFactory::declareRange("orb/scale", 0.5, 2.0, 1.2, 0.05));
+
+            std::map<std::string, int> set;
+            set["ORB::HARRIS_SCORE"] = cv::ORB::HARRIS_SCORE;
+            set["ORB::FAST_SCORE"] = cv::ORB::FAST_SCORE;
+            add(ParameterFactory::declareParameterSet("orb/type", set, (int) cv::ORB::HARRIS_SCORE));
         }
     };
     static KeyParams& params() {
@@ -51,10 +56,11 @@ struct Orb : public ExtractorManager::ExtractorInitializer {
         int first_level = params().read<int>   (param, "orb/first_level");
         int WTA_K       = params().read<int>   (param, "orb/WTA_K");
         int patch_size  = params().read<int>   (param, "orb/patch_size");
+        int type        = params().read<int>   (param, "orb/type");
 
         e->keypoint = "orb";
         e->has_orientation = true;
-        e->detector = new cv::ORB((200-et)*10, scale, levels, edge, first_level, WTA_K, cv::ORB::FAST_SCORE, patch_size);
+        e->detector = new cv::ORB((200-et)*10, scale, levels, edge, first_level, WTA_K, type, patch_size);
 
         if(complete) {
             e->is_binary = true;
