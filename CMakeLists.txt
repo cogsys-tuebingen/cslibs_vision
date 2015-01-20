@@ -15,8 +15,8 @@ endif()
 
 find_package(catkin REQUIRED COMPONENTS cv_bridge utils_param cmake_modules)
 
-find_package(OpenCV REQUIRED)
-message("Found OpenCV ${OpenCV_VERSION}")
+# note to ubuntu 14 users: if opencv is installed at /usr/local and is not found:    sudo ldconfig /usr/local/lib
+find_package(OpenCV REQUIRED nonfree)
 
 find_package(Eigen QUIET)
 if(NOT ${Eigen_FOUND})
