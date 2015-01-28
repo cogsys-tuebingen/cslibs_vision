@@ -7,7 +7,7 @@
 #include <string>
 #include <typeinfo>
 
-using namespace Types;
+namespace Types {
 
 template <class T>
 typename Parameter<T>::SubType Parameter<T>::read(const std::string& type)
@@ -52,3 +52,5 @@ void StrategyImp::initialize(std::map<ID, std::string> &map)
 
 /// INSTANCIATION
 template class Parameter<StrategyImp>;
+
+}

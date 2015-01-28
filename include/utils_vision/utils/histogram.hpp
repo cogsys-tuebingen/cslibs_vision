@@ -94,7 +94,7 @@ inline Range make_range()
  */
 template<typename Tp>
 inline Range make_min_max_range(const cv::Mat &src,
-                                const cv::Mat &mask = cv::noArray())
+                                const cv::Mat &mask = cv::Mat())
 {
     double min_val = std::numeric_limits<Tp>::min();
     double max_val = std::numeric_limits<Tp>::max();
@@ -217,7 +217,7 @@ inline void normalize(const cv::Mat &src, cv::Mat &dst, const std::vector<double
 
     std::vector<cv::Mat> channels;
     cv::split(src, channels);
-    for(int i = 0 ; i < channel_factors.size() / 2 ; i += 2) {
+    for(unsigned int i = 0 ; i < channel_factors.size() / 2 ; i += 2) {
         cv::normalize(channels[i], channels[i], channel_factors[i], channel_factors[i+1], norm);
     }
     cv::merge(channels, dst);
