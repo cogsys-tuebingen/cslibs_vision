@@ -926,7 +926,7 @@ void PreemptiveSLIC::preemptiveSLIC(const Mat& I_rgb, const int k, const double 
   
   if(nlabels) delete [] nlabels;
 
-  labels = cv::Mat(m_height, m_width, CV_32FC1, klabels);
+  labels = cv::Mat(m_height, m_width, CV_32SC1, klabels);
 
 }
 
