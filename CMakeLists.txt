@@ -62,12 +62,11 @@ add_library(logger
 
 ##### CORE
 add_library(utils_vision
-    src/utils/extractors_default.cpp
-
     src/config/config.cpp
     src/config/configurated_tools.cpp
     src/config/reconfigurable.cpp
     src/config/types.cpp
+
     src/data/angle.cpp
     src/data/directory_io.cpp
     src/data/frame.cpp
@@ -77,9 +76,12 @@ add_library(utils_vision
     src/data/matchable_pose.cpp
     src/data/painter.cpp
     src/data/pose.cpp
+
     src/utils/extractor.cpp
+    src/utils/extractors_default.cpp
     src/utils/extractor_factory.cpp
     src/utils/extractor_manager.cpp
+    src/utils/flood.cpp
     src/utils/hough_peak.cpp
     src/utils/matcher.cpp
     src/utils/match_scorer.cpp
@@ -87,7 +89,18 @@ add_library(utils_vision
     src/utils/match_scorer_clustering.cpp
     src/utils/match_scorer_reprojection.cpp
     src/utils/match_scorer_factory.cpp
+    src/utils/perspective_transform.cpp
+    src/utils/randomforest.cpp
+    src/utils/undistortion.cpp
+
+    include/utils_vision/utils/color_functions.hpp
+    include/utils_vision/utils/heatmap.hpp
+    include/utils_vision/utils/histogram.hpp
+    include/utils_vision/utils/kernel.hpp
+    include/utils_vision/utils/log_odds.hpp
+    include/utils_vision/utils/noise_filter.hpp
     include/utils_vision/utils/opencv_utils.hpp
+
     src/utils/grusig_descriptor.cpp
     src/utils/rectangle_cluster.cpp
     src/utils/camera_calibration.cpp
