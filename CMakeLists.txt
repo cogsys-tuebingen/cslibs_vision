@@ -90,16 +90,18 @@ add_library(utils_vision
     src/utils/match_scorer_reprojection.cpp
     src/utils/match_scorer_factory.cpp
     src/utils/perspective_transform.cpp
+    src/utils/preemptiveSLIC.cpp
     src/utils/randomforest.cpp
     src/utils/undistortion.cpp
 
-    include/utils_vision/utils/color_functions.hpp
-    include/utils_vision/utils/heatmap.hpp
-    include/utils_vision/utils/histogram.hpp
-    include/utils_vision/utils/kernel.hpp
-    include/utils_vision/utils/log_odds.hpp
-    include/utils_vision/utils/noise_filter.hpp
-    include/utils_vision/utils/opencv_utils.hpp
+    #include/utils_vision/utils/cluster_boundaries.hpp
+    #include/utils_vision/utils/color_functions.hpp
+    #include/utils_vision/utils/heatmap.hpp
+    #include/utils_vision/utils/histogram.hpp
+    #include/utils_vision/utils/kernel.hpp
+    #include/utils_vision/utils/log_odds.hpp
+    #include/utils_vision/utils/noise_filter.hpp
+    #include/utils_vision/utils/opencv_utils.hpp
 
     src/utils/grusig_descriptor.cpp
     src/utils/rectangle_cluster.cpp
