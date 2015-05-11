@@ -1,0 +1,5 @@
+#ifndef LOCAL_PATTERNS_H
+#define LOCAL_PATTERNS_H
+
+#endif // LOCAL_PATTERNS_H
+
