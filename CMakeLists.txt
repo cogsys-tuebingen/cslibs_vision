@@ -102,6 +102,9 @@ add_library(utils_vision
     #include/utils_vision/utils/log_odds.hpp
     #include/utils_vision/utils/noise_filter.hpp
     #include/utils_vision/utils/opencv_utils.hpp
+#    include/utils_vision/textures/texture_descriptor.hpp
+#    include/utils_vision/textures/lbp.hpp
+#    include/utils_vision/textures/ltp.hpp
 
     src/utils/grusig_descriptor.cpp
     src/utils/rectangle_cluster.cpp
