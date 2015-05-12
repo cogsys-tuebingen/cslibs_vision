@@ -14,57 +14,16 @@ public:
     typedef cv::Ptr<LBP> Ptr;
 
     /**
-     * @brief LBP constructor.
-     */
-    LBP() :
-        histogram_(cv::Mat_<int>(1, 256, 0))
-    {
-    }
-
-    /**
-     * @brief operator - calculates the euclidian distance
-     *        between two descriptors.
-     * @param other     LBP histogram
-     * @return          the distance
-     */
-    double operator - (const LBP &other) const
-    {
-        double sum = 0;
-        for(int i = 0 ; i < histogram_.rows ; ++i) {
-            int diff = histogram_.at<int>(i) - other.histogram_.at<int>(i);
-            sum += diff * diff;
-        }
-        return std::sqrt(sum);
-    }
-
-    /**
-     * @brief Get the calculated histogram.
-     * @param histogram     a matrix to be written to
-     */
-    void get(cv::Mat &histogram) const
-    {
-        histogram_.copyTo(histogram);
-    }
-
-    /**
-     * @brief Get the calculated histogram.
-     * @param _histogram    a vector to be written to
-     */
-    void get(std::vector<int> &_histogram) const
-    {
-        histogram_.copyTo(_histogram);
-    }
-
-    /**
      * @brief The standard extraction mechanism.
      * @param _src      the image to extract the information of
      * @param k         the distance offset parameter
      */
     template <typename _Tp>
-    inline void stdExtraction(cv::InputArray _src, const _Tp k = 0) {
-        histogram_.setTo(0);
-        // get matrices
-        cv::Mat src = _src.getMat();
+    static inline void stdExtraction(const cv::Mat &src,
+                                     const _Tp k,
+                                     cv::Mat &dst)
+    {
+        dst = cv::Mat_<int>(1, 256, 0);
         // calculate patterns
         for(int i=1;i<src.rows-1;++i) {
             for(int j=1;j<src.cols-1;++j) {
@@ -80,7 +39,7 @@ public:
                 histgram_pos += (src.at<_Tp>(i+1,j-1)   >= center) << 1;
                 histgram_pos += (src.at<_Tp>(i,j-1)     >= center) << 0;
 
-                histogram_.at<int>(histgram_pos)++;
+                dst.at<int>(histgram_pos)++;
             }
         }
     }
@@ -93,10 +52,14 @@ public:
      * @param k             the distance offset
      */
     template <typename _Tp>
-    inline void extExtraction(cv::InputArray _src, const int radius, const int neighbours, const _Tp k = 0) {
-        histogram_.setTo(0);
-        //get matrices
-        cv::Mat src = _src.getMat();
+    static inline void extExtraction(const cv::Mat &src,
+                                     const int radius,
+                                     const int neighbours,
+                                     const _Tp k,
+                                     cv::Mat &dst)
+    {
+        dst = cv::Mat_<int>(1, 256, 0);
+
         for(int n=0; n<neighbours; ++n) {
             // sample points
             float x = static_cast<float>(-radius * sin(2.0*CV_PI*n/static_cast<float>(neighbours)));
@@ -123,15 +86,34 @@ public:
                     _Tp center = src.at<_Tp>(i,j) + k;
                     unsigned char histogram_pos = 0;
                     histogram_pos += (t >= center) << n;
-                    histogram_.at<int>(histogram_pos)++;
+                    dst.at<int>(histogram_pos)++;
                 }
             }
         }
     }
 
 
-private:
-    cv::Mat histogram_;
+    template <typename _Tp>
+    static inline void stdExtraction(const cv::Mat &src,
+                                     const _Tp k,
+                                     std::vector<int> &dst)
+    {
+        cv::Mat tmp;
+        stdExtraction<_Tp>(src, k, tmp);
+        tmp.copyTo(dst);
+    }
+
+    template <typename _Tp>
+    static inline void extExtraction(const cv::Mat &src,
+                                     const int radius,
+                                     const int neighbours,
+                                     const _Tp k,
+                                     std::vector<int> &dst)
+    {
+        cv::Mat tmp;
+        extExtraction<_Tp>(src, radius, neighbours, k, tmp);
+        tmp.copyTo(dst);
+    }
 };
 }
 #endif // LBP_HPP

@@ -13,105 +13,18 @@ public:
     typedef cv::Ptr<TextureDescriptor> Ptr;
 
     /**
-     * @brief LTP constructor.
-     */
-    LTP() :
-        pos_(cv::Mat_<int>(1, 256, 0)),
-        neg_(cv::Mat_<int>(1, 256, 0))
-    {
-    }
-
-    /**
-     * @brief operator - calculates the euclidian distance
-     *        between two descriptors.
-     * @param other     LTP histogram
-     * @return          the distance
-     */
-    inline double operator - (const LTP &other) const
-    {
-        double sum = 0;
-        for(int i = 0 ; i < pos_.rows ; ++i) {
-            int pos_diff = pos_.at<int>(i) - other.pos_.at<int>(i);
-            int neg_diff = neg_.at<int>(i) - other.neg_.at<int>(i);
-            sum += pos_diff * pos_diff + neg_diff * neg_diff;
-        }
-        return std::sqrt(sum);
-    }
-
-    /**
-     * @brief Get the positive match histogram.
-     * @param pos       a matrix to be written to
-     */
-    void getPos(cv::Mat &pos) const
-    {
-        pos_.copyTo(pos);
-    }
-
-    /**
-     * @brief Get the positive match histogram.
-     * @param pos       a vector to be written to
-     */
-    void getPos(std::vector<int> &pos) const
-    {
-        pos_.copyTo(pos);
-    }
-
-
-    /**
-     * @brief Get the negative match histogram.
-     * @param neg       a matrix to be written to
-     */
-    void getNeg(cv::Mat &neg) const
-    {
-        neg_.copyTo(neg);
-    }
-
-    /**
-     * @brief Get the negative match histogram.
-     * @param neg       a vector to be written to
-     */
-    void getNeg(std::vector<int> &neg) const
-    {
-        neg_.copyTo(neg);
-    }
-
-    /**
-     * @brief Get the the histograms all together
-     * @param all       a matrix to be written to
-     */
-    void getAll(cv::Mat &all) const
-    {
-        all = cv::Mat(1, pos_.cols + neg_.cols, CV_32SC1, cv::Scalar::all(0));
-        cv::Mat pos(all.colRange(0, pos_.cols - 1));
-        cv::Mat neg(all.colRange(pos_.cols, pos_.cols + neg_.cols - 1));
-        getPos(pos);
-        getNeg(neg);
-    }
-
-    /**
-     * @brief Get the the histograms all together
-     * @param all       a vector to be written to
-     */
-    void getAll(std::vector<int> &all) const
-    {
-        all.clear();
-        all.insert(all.end(), pos_.begin<int>(), pos_.end<int>());
-        all.insert(all.end(), neg_.begin<int>(), neg_.end<int>());
-    }
-
-
-
-    /**
      * @brief The standard extraction mechanism.
      * @param _src  the image to extract the information of
      * @param k     the distance offset parameter
      */
     template <typename _Tp>
-    inline void stdExtraction(cv::InputArray _src, const _Tp k) {
-        pos_.setTo(0);
-        neg_.setTo(0);
-        // get matrices
-        cv::Mat src = _src.getMat();
+    static inline void stdExtraction(const cv::Mat &src,
+                                     const _Tp k,
+                                     cv::Mat &dst) {
+        dst = cv::Mat_<int>(1, 512, 0);
+        cv::Mat pos = dst.colRange(0, 256);
+        cv::Mat neg = dst.colRange(256, 512);
+
         // calculate patterns
         for(int i=1;i<src.rows-1;++i) {
             for(int j=1;j<src.cols-1;++j) {
@@ -138,8 +51,8 @@ public:
                 hist_pos_it += (src.at<_Tp>(i,j-1)     >= center_plus_k) << 0;
                 hist_neg_it += (src.at<_Tp>(i,j-1)      < center_minu_k) << 0;
 
-                neg_.at<int>(hist_neg_it)++;
-                pos_.at<int>(hist_pos_it)++;
+                neg.at<int>(hist_neg_it)++;
+                pos.at<int>(hist_pos_it)++;
             }
         }
     }
@@ -152,9 +65,16 @@ public:
      * @param k             the distance offset
      */
     template <typename _Tp>
-    inline void extExtraction(cv::InputArray _src, const int radius, const int neighbours, const _Tp k) {
-        //get matrices
-        cv::Mat src = _src.getMat();
+    static inline void extExtraction(const cv::Mat  &src,
+                                     const int radius,
+                                     const int neighbours,
+                                     const _Tp k,
+                                     cv::Mat &dst) {
+
+        dst = cv::Mat_<int>(1, 512, 0);
+        cv::Mat pos = dst.colRange(0, 256);
+        cv::Mat neg = dst.colRange(256, 512);
+
         for(int n=0; n<neighbours; ++n) {
             // sample points
             float x = static_cast<float>(-radius * sin(2.0*CV_PI*n/static_cast<float>(neighbours)));
@@ -185,16 +105,32 @@ public:
                     _Tp center_plus_k = center + k;
                     hist_pos_it += (t   >= center_plus_k) << n;
                     hist_neg_it += (t    < center_minu_k) << n;
-                    neg_.at<int>(hist_neg_it)++;
-                    pos_.at<int>(hist_pos_it)++;
+                    neg.at<int>(hist_neg_it)++;
+                    pos.at<int>(hist_pos_it)++;
                 }
             }
         }
     }
 
-private:
-    cv::Mat pos_;
-    cv::Mat neg_;
+    template <typename _Tp>
+    static inline void stdExtraction(const cv::Mat &src,
+                                     const _Tp k,
+                                     std::vector<int> &dst) {
+        cv::Mat tmp;
+        stdExtraction<_Tp>(src, k, tmp);
+        tmp.copyTo(dst);
+    }
+
+    template <typename _Tp>
+    static inline void extExtraction(const cv::Mat  &src,
+                                     const int radius,
+                                     const int neighbours,
+                                     const _Tp k,
+                                     std::vector<int> &dst) {
+        cv::Mat tmp;
+        extExtraction<_Tp>(src, radius, neighbours, k, tmp);
+        tmp.copyTo(dst);
+    }
 
 };
 }
