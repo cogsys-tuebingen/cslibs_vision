@@ -2,6 +2,7 @@
 #define TEXTURE_DESCRIPTOR_HPP
 
 #include <opencv2/opencv.hpp>
+#include <math.h>
 
 /**
  * @brief The TextureDescriptor class represents the base class for
