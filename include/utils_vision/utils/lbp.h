@@ -14,19 +14,19 @@ namespace lbp {
 
 // templated functions
 template <typename _Tp>
-void OLBP_(const cv::Mat& src, cv::Mat& dst);
+void OLBP_(const cv::Mat& src, cv::Mat& dst);           /// done
 
 template <typename _Tp>
-void ELBP_(const cv::Mat& src, cv::Mat& dst, int radius = 1, int neighbors = 8);
+void ELBP_(const cv::Mat& src, cv::Mat& dst, int radius = 1, int neighbors = 8);            /// done
 
 template <typename _Tp>
-void VARLBP_(const cv::Mat& src, cv::Mat& dst, int radius = 1, int neighbors = 8);
+void VARLBP_(const cv::Mat& src, cv::Mat& dst, int radius = 1, int neighbors = 8);            /// done
 
 template <typename _Tp>
-void OLTP_(const cv::Mat& src, cv::Mat& dst);//LTP
+void OLTP_(const cv::Mat& src, cv::Mat& dst);//LTP            /// done
 
 template <typename _Tp>
-void OCSLBP_(const cv::Mat& src, cv::Mat& dst);//CS_LBP
+void OCSLBP_(const cv::Mat& src, cv::Mat& dst);//CS_LBP      /// done
 
 template <typename _Tp>
 void OWLD_(const cv::Mat& src, cv::Mat& dst);//WLD

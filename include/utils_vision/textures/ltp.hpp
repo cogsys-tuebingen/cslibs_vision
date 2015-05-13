@@ -77,13 +77,28 @@ public:
         }
     }
 
+    static inline void standardCompact(const cv::Mat &src,
+                                       const double k,
+                                       cv::Mat &dst)
+    {
+        switch(src.type()) {
+        case CV_8UC1: _standardCompact<uchar>(src, k, dst);  break;
+        case CV_8SC1: _standardCompact<char>(src, k, dst);   break;
+        case CV_16UC1:_standardCompact<ushort>(src, k, dst); break;
+        case CV_16SC1:_standardCompact<short>(src, k, dst);  break;
+        case CV_32SC1:_standardCompact<int>(src, k, dst);    break;
+        case CV_32FC1:_standardCompact<float>(src, k, dst);  break;
+        case CV_64FC1:_standardCompact<double>(src, k, dst); break;
+        default: throw std::runtime_error("Unsupported matrix type!");
+        }
+    }
+
     static inline void extended(const cv::Mat &src,
                                 const int radius,
                                 const int neighbours,
                                 const double k,
                                 cv::Mat &dst)
     {
-
         switch(src.type()) {
         case CV_8UC1: _extended<uchar>(src, radius, neighbours, k, dst);  break;
         case CV_8SC1: _extended<char>(src, radius, neighbours, k, dst);   break;
@@ -95,8 +110,6 @@ public:
         default: throw std::runtime_error("Unsupported matrix type!");
         }
     }
-
-
 
 private:
     template <typename _Tp>
@@ -133,6 +146,107 @@ private:
                 code_neg |= (src.at<_Tp>(i,j-1)      < center_minu_k) << 0;
                 entry[0] = code_neg;
                 entry[1] = code_pos;
+            }
+        }
+    }
+
+    template <typename _Tp>
+    static inline void _standardCompact(const cv::Mat &src,
+                                        const double k,
+                                        cv::Mat &dst)
+    {
+        static const unsigned char lut[8][3] = {{0,8,16},
+                                                {1,9,17},
+                                                {2,10,18},
+                                                {3,11,19},
+                                                {4,12,20},
+                                                {5,13,21},
+                                                {6,14,22},
+                                                {7,15,23}};
+
+        double thresholdneg = -k;
+        dst = cv::Mat_<uchar>(src.rows-2, src.cols-2, (uchar) 0);
+        double diff = 0.0;
+        double max  = 0.0;
+        double min  = 255.0;
+
+        for(int i=1 ; i < src.rows-1 ; ++i) {
+            for(int j=1 ; j<src.cols-1 ; ++j) {
+                _Tp center = src.at<_Tp>(i,j);
+                unsigned char code = 0;
+
+                //// ------------------------------
+                diff=src.at<_Tp>(i-1,j-1) - center;
+                if(diff>k)
+                    code=lut[0][0];
+                else if(diff<thresholdneg)
+                    code=lut[0][2];
+                else
+                    code=lut[0][1];
+                //// ------------------------------
+                diff=src.at<_Tp>(i-1,j) - center;
+                if(diff>k)
+                    code+=lut[1][0];
+                else if(diff<thresholdneg)
+                    code+=lut[1][2];
+                else
+                    code+=lut[1][1];
+                //// ------------------------------
+                diff=src.at<_Tp>(i-1,j+1) - center;
+                if(diff>k)
+                    code+=lut[2][0];
+                else if(diff<thresholdneg)
+                    code+=lut[2][2];
+                else
+                    code+=lut[2][1];
+                diff=src.at<_Tp>(i,j+1) - center;
+                //// ------------------------------
+                if(diff>k)
+                    code+=lut[3][0];
+                else if(diff<thresholdneg)
+                    code+=lut[3][2];
+                else
+                    code+=lut[3][1];
+                //// ------------------------------
+                diff=src.at<_Tp>(i+1,j+1) - center;
+                if(diff>k)
+                    code+=lut[4][0];
+                else if(diff<thresholdneg)
+                    code+=lut[4][2];
+                else
+                    code+=lut[4][1];
+                //// ------------------------------
+                diff=src.at<_Tp>(i+1,j) - center;
+                if(diff>k)
+                    code+=lut[5][0];
+                else if(diff<thresholdneg)
+                    code+=lut[5][2];
+                else
+                    code+=lut[5][1];
+                //// ------------------------------
+                diff=src.at<_Tp>(i+1,j-1) - center;
+                if(diff>k)
+                    code+=lut[6][0];
+                else if(diff<thresholdneg)
+                    code+=lut[6][2];
+                else
+                    code+=lut[6][1];
+                //// ------------------------------
+                diff=src.at<_Tp>(i,j-1) - center;
+                if(diff>k)
+                    code+=lut[7][0];
+                else if(diff<thresholdneg)
+                    code+=lut[7][2];
+                else
+                    code+=lut[7][1];
+
+                //// ------------------------------
+                dst.at<unsigned char>(i-1,j-1) = code;
+                //cout<<(int)code<<" ";
+                if(code > max)
+                    max = (double) code;
+                if(code<min)
+                    min = (double) code;
             }
         }
     }

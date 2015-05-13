@@ -101,6 +101,23 @@ public:
         }
     }
 
+
+    static inline void center_symmetric(const cv::Mat &src,
+                                        const double k,
+                                        cv::Mat &dst)
+    {
+        switch(src.type()) {
+        case CV_8UC1: _center_symmetric<uchar>(src, k, dst);  break;
+        case CV_8SC1: _center_symmetric<char>(src, k, dst);   break;
+        case CV_16UC1:_center_symmetric<ushort>(src, k, dst); break;
+        case CV_16SC1:_center_symmetric<short>(src, k, dst);  break;
+        case CV_32SC1:_center_symmetric<int>(src, k, dst);    break;
+        case CV_32FC1:_center_symmetric<float>(src, k, dst);  break;
+        case CV_64FC1:_center_symmetric<double>(src, k, dst); break;
+        default: throw std::runtime_error("Unsupported matrix type!");
+        }
+    }
+
 private:
     template <typename _Tp>
     inline static void _standard(const cv::Mat& src,
@@ -207,6 +224,33 @@ private:
             }
         }
     }
+
+
+    template <typename _Tp>
+    static inline void _center_symmetric(const cv::Mat& src,
+                                         const double k,
+                                         cv::Mat& dst)
+    {
+        dst = cv::Mat_<uchar>(src.rows-2, src.cols-2, (uchar) 0);
+        double diff = 0.0;
+        for(int i=1 ; i<src.rows-1 ; ++i) {
+            for(int j=1 ; j<src.cols-1 ; ++j) {
+                //_Tp center = src.at<_Tp>(i,j);
+                unsigned char code = 0;
+                diff=src.at<_Tp>(i-1,j-1)-src.at<_Tp>(i+1,j+1);
+                code |= ( diff> k ) << 3;
+                diff=src.at<_Tp>(i-1,j)-src.at<_Tp>(i+1,j);
+                code |= ( diff> k ) << 2;
+                diff=src.at<_Tp>(i-1,j+1)-src.at<_Tp>(i+1,j-1);
+                code |= ( diff> k ) << 1;
+                diff=src.at<_Tp>(i,j+1)-src.at<_Tp>(i,j-1) ;
+                code |= ( diff> k ) << 0;
+                dst.at<unsigned char>(i-1,j-1) = code;
+            }
+        }
+    }
+
+
 
 };
 }
