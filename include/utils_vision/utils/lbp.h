@@ -29,16 +29,16 @@ template <typename _Tp>
 void OCSLBP_(const cv::Mat& src, cv::Mat& dst);//CS_LBP      /// done
 
 template <typename _Tp>
-void OWLD_(const cv::Mat& src, cv::Mat& dst);//WLD
+void OWLD_(const cv::Mat& src, cv::Mat& dst);//WLD          /// done
 
 template <typename _Tp>
-void OWLDSHORT_(const cv::Mat& src, cv::Mat& dst);//WLD_Short
+void OWLDSHORT_(const cv::Mat& src, cv::Mat& dst);//WLD_Short /// done
 
 template <typename _Tp>
-void OWLDORI_(const cv::Mat& src, cv::Mat& dst);//WLD_Orientation
+void OWLDORI_(const cv::Mat& src, cv::Mat& dst);//WLD_Orientation   /// done
 
 template <typename _Tp>
-void OHOMOGENEITY_(const cv::Mat& src, cv::Mat& dst);//Local Homogeneity
+void OHOMOGENEITY_(const cv::Mat& src, cv::Mat& dst);//Local Homogeneity    /// done
 
 template <typename _Tp>
 void OHOMOGENEITYOFTEXTURE_(const cv::Mat& src, cv::Mat& dst);//Local Homogeneity of Texture
