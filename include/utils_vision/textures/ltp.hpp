@@ -77,18 +77,18 @@ public:
         }
     }
 
-    static inline void standardCompact(const cv::Mat &src,
+    static inline void shortened(const cv::Mat &src,
                                        const double k,
                                        cv::Mat &dst)
     {
         switch(src.type()) {
-        case CV_8UC1: _standardCompact<uchar>(src, k, dst);  break;
-        case CV_8SC1: _standardCompact<char>(src, k, dst);   break;
-        case CV_16UC1:_standardCompact<ushort>(src, k, dst); break;
-        case CV_16SC1:_standardCompact<short>(src, k, dst);  break;
-        case CV_32SC1:_standardCompact<int>(src, k, dst);    break;
-        case CV_32FC1:_standardCompact<float>(src, k, dst);  break;
-        case CV_64FC1:_standardCompact<double>(src, k, dst); break;
+        case CV_8UC1: _shortened<uchar>(src, k, dst);  break;
+        case CV_8SC1: _shortened<char>(src, k, dst);   break;
+        case CV_16UC1:_shortened<ushort>(src, k, dst); break;
+        case CV_16SC1:_shortened<short>(src, k, dst);  break;
+        case CV_32SC1:_shortened<int>(src, k, dst);    break;
+        case CV_32FC1:_shortened<float>(src, k, dst);  break;
+        case CV_64FC1:_shortened<double>(src, k, dst); break;
         default: throw std::runtime_error("Unsupported matrix type!");
         }
     }
@@ -151,7 +151,7 @@ private:
     }
 
     template <typename _Tp>
-    static inline void _standardCompact(const cv::Mat &src,
+    static inline void _shortened(const cv::Mat &src,
                                         const double k,
                                         cv::Mat &dst)
     {
@@ -259,7 +259,7 @@ private:
                                  const double k,
                                  cv::Mat& dst) {
         int n = std::max(std::min(neighbours,31),1); // set bounds...
-        dst = cv::Mat_<cv::Vec2i>(src.rows-2*radius, src.cols-2*radius, 0);
+        dst = cv::Mat_<cv::Vec2i>(src.rows-2*radius, src.cols-2*radius, cv::Vec2i());
         for(int i=0; i<n; ++i) {
             // sample points
             double x = static_cast<double>(radius) * cos(2.0*M_PI*i/static_cast<float>(n));

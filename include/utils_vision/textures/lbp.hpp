@@ -102,18 +102,18 @@ public:
     }
 
 
-    static inline void center_symmetric(const cv::Mat &src,
+    static inline void centerSymmetric(const cv::Mat &src,
                                         const double k,
                                         cv::Mat &dst)
     {
         switch(src.type()) {
-        case CV_8UC1: _center_symmetric<uchar>(src, k, dst);  break;
-        case CV_8SC1: _center_symmetric<char>(src, k, dst);   break;
-        case CV_16UC1:_center_symmetric<ushort>(src, k, dst); break;
-        case CV_16SC1:_center_symmetric<short>(src, k, dst);  break;
-        case CV_32SC1:_center_symmetric<int>(src, k, dst);    break;
-        case CV_32FC1:_center_symmetric<float>(src, k, dst);  break;
-        case CV_64FC1:_center_symmetric<double>(src, k, dst); break;
+        case CV_8UC1: _centerSymmetric<uchar>(src, k, dst);  break;
+        case CV_8SC1: _centerSymmetric<char>(src, k, dst);   break;
+        case CV_16UC1:_centerSymmetric<ushort>(src, k, dst); break;
+        case CV_16SC1:_centerSymmetric<short>(src, k, dst);  break;
+        case CV_32SC1:_centerSymmetric<int>(src, k, dst);    break;
+        case CV_32FC1:_centerSymmetric<float>(src, k, dst);  break;
+        case CV_64FC1:_centerSymmetric<double>(src, k, dst); break;
         default: throw std::runtime_error("Unsupported matrix type!");
         }
     }
@@ -151,11 +151,11 @@ private:
                                  const double k,
                                  cv::Mat& dst) {
         int n = std::max(std::min(neighbours,31),1); // set bounds...
-        dst = cv::Mat_<int>(src.rows-2*radius, src.cols-2*radius, 0);
-        for(int i=0; i<n; ++i) {
+        dst = cv::Mat_<int>(src.rows-2*radius, src.cols-2*radius, (int) 0);
+        for(int m=0; m<n; ++m) {
             // sample points
-            double x = static_cast<float>(radius) * cos(2.0*M_PI*i/static_cast<float>(n));
-            double y = static_cast<float>(radius) * -sin(2.0*M_PI*i/static_cast<float>(n));
+            double x = static_cast<float>(radius) * cos(2.0*M_PI*m/static_cast<float>(n));
+            double y = static_cast<float>(radius) * -sin(2.0*M_PI*m/static_cast<float>(n));
             // relative indices
             int fx = static_cast<int>(floor(x));
             int fy = static_cast<int>(floor(y));
@@ -172,9 +172,9 @@ private:
             // iterate through your data
             for(int i=radius; i < src.rows-radius;i++) {
                 for(int j=radius;j < src.cols-radius;j++) {
-                    float t = w1*src.at<_Tp>(i+fy,j+fx) + w2*src.at<_Tp>(i+fy,j+cx) + w3*src.at<_Tp>(i+cy,j+fx) + w4*src.at<_Tp>(i+cy,j+cx);
+                    double t = w1*src.at<_Tp>(i+fy,j+fx) + w2*src.at<_Tp>(i+fy,j+cx) + w3*src.at<_Tp>(i+cy,j+fx) + w4*src.at<_Tp>(i+cy,j+cx);
                     // we are dealing with floating point precision, so add some little tolerance
-                    dst.at<int>(i-radius,j-radius) += ((t > src.at<_Tp>(i,j) + k) && (abs(t-(src.at<_Tp>(i,j) + k)) > std::numeric_limits<float>::epsilon())) << i;
+                    dst.at<int>(i-radius,j-radius) += ((t > (src.at<_Tp>(i,j) + k)) && (std::abs(t - (src.at<_Tp>(i,j) + k)) > std::numeric_limits<double>::epsilon())) << m;
                 }
             }
         }
@@ -227,7 +227,7 @@ private:
 
 
     template <typename _Tp>
-    static inline void _center_symmetric(const cv::Mat& src,
+    static inline void _centerSymmetric(const cv::Mat& src,
                                          const double k,
                                          cv::Mat& dst)
     {
