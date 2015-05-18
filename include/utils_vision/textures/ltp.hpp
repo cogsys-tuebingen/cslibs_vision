@@ -117,11 +117,11 @@ private:
                                  const double k,
                                  cv::Mat& dst)
     {
-        dst = cv::Mat_<cv::Vec2b>(src.rows-2, src.cols-2, 0);
+        dst = cv::Mat_<cv::Vec2b>(src.rows-2, src.cols-2, cv::Vec2b());
 
         for(int i = 1 ; i < src.rows-1 ;++i) {
             for(int j=1 ; j < src.cols-1; ++j) {
-                cv::Vec2b &entry = dst.at<cv::Vec2b>(i,j);
+                cv::Vec2b &entry = dst.at<cv::Vec2b>(i-1,j-1);
                 double center = src.at<_Tp>(i,j);
                 unsigned char code_neg = 0;
                 unsigned char code_pos = 0;
