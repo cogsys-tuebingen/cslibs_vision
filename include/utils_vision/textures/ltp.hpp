@@ -260,10 +260,10 @@ private:
                                  cv::Mat& dst) {
         int n = std::max(std::min(neighbours,31),1); // set bounds...
         dst = cv::Mat_<cv::Vec2i>(src.rows-2*radius, src.cols-2*radius, cv::Vec2i());
-        for(int i=0; i<n; ++i) {
+        for(int m=0; m<n; ++m) {
             // sample points
-            double x = static_cast<double>(radius) * cos(2.0*M_PI*i/static_cast<float>(n));
-            double y = static_cast<double>(radius) * -sin(2.0*M_PI*i/static_cast<float>(n));
+            double x = static_cast<double>(radius) * cos(2.0*M_PI*m/static_cast<float>(n));
+            double y = static_cast<double>(radius) * -sin(2.0*M_PI*m/static_cast<float>(n));
             // relative indices
             int fx = static_cast<int>(floor(x));
             int fy = static_cast<int>(floor(y));
@@ -284,8 +284,8 @@ private:
                     double cmk = src.at<_Tp>(i,j) - k;
                     double cpk = src.at<_Tp>(i,j) + k;
                     cv::Vec2i &entry = dst.at<cv::Vec2i>(i-radius, j-radius);
-                    entry[0] += ((t >= cpk ) && (abs(t - cpk) > std::numeric_limits<double>::epsilon())) << i;
-                    entry[1] += ((t <  cmk ) && (abs(t - cpk) > std::numeric_limits<double>::epsilon())) << i;
+                    entry[0] += ((t >= cpk ) && (abs(t - cpk) > std::numeric_limits<double>::epsilon())) << m;
+                    entry[1] += ((t <  cmk ) && (abs(t - cpk) > std::numeric_limits<double>::epsilon())) << m;
                 }
             }
         }
