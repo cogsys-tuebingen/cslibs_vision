@@ -189,6 +189,15 @@ inline void histogram(const cv::Mat &src, std::vector<cv::MatND> &histograms, co
     }
 }
 
+inline int numClusters(const cv::Mat &src)
+{
+    assert(src.type() == CV_32SC1);
+    double min, max;
+    cv::minMaxLoc(src, &min, &max);
+    return max - min + 1;
+
+}
+
 template<typename _Tp>
 inline void histogram(const cv::Mat        &src,
                       const cv::Mat        &mask,
@@ -196,21 +205,20 @@ inline void histogram(const cv::Mat        &src,
                       const _Tp             range_min,
                       const _Tp             range_max,
                       const int             bins,
+                      const int             num_clusters,
                       std::vector<cv::Mat> &histograms)
 {
     assert(src.channels() == 1);
-    assert(mask.type() == CV_8UC1);
+    assert(clusters.rows == src.rows);
+    assert(clusters.cols == src.cols);
     assert(clusters.type() == CV_32SC1);
     assert(range_min < range_max);
 
-    double min, max;
-    cv::minMaxLoc(clusters, &min, &max);
-    histograms.resize(max - min, cv::Mat(1, bins, CV_32SC1, cv::Scalar::all(0)));
+    histograms.resize(num_clusters, cv::Mat(1, bins, CV_32SC1, cv::Scalar::all(0)));
 
     const int    size = src.rows * src.cols;
     const double bin_size_inv = 1.0 / ((range_max - range_min) / (double) bins);
     const _Tp   *src_ptr     = src.ptr<_Tp>();
-    const uchar *mask_ptr    = mask.ptr<uchar>();
     const int   *cluster_ptr = clusters.ptr<int>();
     cv::Mat     *hist_ptr = histograms.data();
 
@@ -224,6 +232,7 @@ inline void histogram(const cv::Mat        &src,
             }
         }
     } else {
+        const uchar *mask_ptr    = mask.ptr<uchar>();
         for(int i = 0 ; i < size ; ++i, ++src_ptr, ++cluster_ptr, ++mask_ptr) {
             const _Tp &val = *src_ptr;
             if(*mask_ptr > 0) {
@@ -244,16 +253,17 @@ inline void histogram(const cv::Mat        &src,
                       const _Tp             range_min,
                       const _Tp             range_max,
                       const int             bins,
+                      const int             num_clusters,
                       cv::Mat              &histograms)
 {
     assert(src.channels() == 1);
     assert(mask.type() == CV_8UC1);
     assert(clusters.type() == CV_32SC1);
+    assert(clusters.rows == src.rows);
+    assert(clusters.cols == src.cols);
     assert(range_min < range_max);
 
-    double min, max;
-    cv::minMaxLoc(clusters, &min, &max);
-    histograms = cv::Mat(max - min, bins, CV_32SC1, cv::Scalar::all(0));
+    histograms = cv::Mat(num_clusters, bins, CV_32SC1, cv::Scalar::all(0));
 
     const int    size = src.rows * src.cols;
     const double bin_size_inv = 1.0 / ((range_max - range_min) / (double) bins);
