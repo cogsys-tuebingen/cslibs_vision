@@ -189,6 +189,105 @@ inline void histogram(const cv::Mat &src, std::vector<cv::MatND> &histograms, co
     }
 }
 
+template<typename _Tp>
+inline void histogram(const cv::Mat        &src,
+                      const cv::Mat        &mask,
+                      const cv::Mat        &clusters,
+                      const _Tp             range_min,
+                      const _Tp             range_max,
+                      const int             bins,
+                      std::vector<cv::Mat> &histograms)
+{
+    assert(src.channels() == 1);
+    assert(mask.type() == CV_8UC1);
+    assert(clusters.type() == CV_32SC1);
+    assert(range_min < range_max);
+
+    double min, max;
+    cv::minMaxLoc(clusters, &min, &max);
+    histograms.resize(max - min, cv::Mat(1, bins, CV_32SC1, cv::Scalar::all(0)));
+
+    const int    size = src.rows * src.cols;
+    const double bin_size_inv = 1.0 / ((range_max - range_min) / (double) bins);
+    const _Tp   *src_ptr     = src.ptr<_Tp>();
+    const uchar *mask_ptr    = mask.ptr<uchar>();
+    const int   *cluster_ptr = clusters.ptr<int>();
+    cv::Mat     *hist_ptr = histograms.data();
+
+    if(mask.empty()) {
+        for(int i = 0 ; i < size ; ++i, ++src_ptr, ++cluster_ptr) {
+            const _Tp &val = *src_ptr;
+            if(val >= range_min && val <= range_max) {
+                int *bins_ptr = hist_ptr[*cluster_ptr].ptr<int>();
+                int bin = floor(val * bin_size_inv);
+                ++(bins_ptr[bin]);
+            }
+        }
+    } else {
+        for(int i = 0 ; i < size ; ++i, ++src_ptr, ++cluster_ptr, ++mask_ptr) {
+            const _Tp &val = *src_ptr;
+            if(*mask_ptr > 0) {
+                if(val >= range_min && val <= range_max) {
+                    int *bins_ptr = hist_ptr[*cluster_ptr].ptr<int>();
+                    int bin = floor(val * bin_size_inv);
+                    ++(bins_ptr[bin]);
+                }
+            }
+        }
+    }
+}
+
+template<typename _Tp>
+inline void histogram(const cv::Mat        &src,
+                      const cv::Mat        &mask,
+                      const cv::Mat        &clusters,
+                      const _Tp             range_min,
+                      const _Tp             range_max,
+                      const int             bins,
+                      cv::Mat              &histograms)
+{
+    assert(src.channels() == 1);
+    assert(mask.type() == CV_8UC1);
+    assert(clusters.type() == CV_32SC1);
+    assert(range_min < range_max);
+
+    double min, max;
+    cv::minMaxLoc(clusters, &min, &max);
+    histograms = cv::Mat(max - min, bins, CV_32SC1, cv::Scalar::all(0));
+
+    const int    size = src.rows * src.cols;
+    const double bin_size_inv = 1.0 / ((range_max - range_min) / (double) bins);
+    const _Tp   *src_ptr     = src.ptr<_Tp>();
+    const uchar *mask_ptr    = mask.ptr<uchar>();
+    const int   *cluster_ptr = clusters.ptr<int>();
+    int*         hist_ptr = histograms.ptr<int>();
+
+    if(mask.empty()) {
+        for(int i = 0 ; i < size ; ++i, ++src_ptr, ++cluster_ptr) {
+            const _Tp &val = *src_ptr;
+            if(val >= range_min && val <= range_max) {
+                int c = *cluster_ptr;
+                int pos = c * bins + floor(val * bin_size_inv);
+                ++(hist_ptr[pos]);
+            }
+        }
+    } else {
+        for(int i = 0 ; i < size ; ++i, ++src_ptr, ++cluster_ptr, ++mask_ptr) {
+            const _Tp &val = *src_ptr;
+            if(*mask_ptr > 0) {
+                if(val >= range_min && val <= range_max) {
+                    int c = *cluster_ptr;
+                    int pos = c * bins + floor(val * bin_size_inv);
+                    ++(hist_ptr[pos]);
+                }
+            }
+        }
+    }
+}
+
+
+
+
 /**
  * @brief Do a full channel histogram equalization of an image.
  * @param src   source image
@@ -345,7 +444,7 @@ inline void render_curve(const cv::Mat &src, const std::vector<Maximum> &maxima,
         it != maxima.end() ;
         ++it) {
         cv::Point2f p(bin_width * it->first + offset,
-                     dst.rows - tmp.at<Tp>(it->first));
+                      dst.rows - tmp.at<Tp>(it->first));
         cv::circle(dst, p, radius, cv::Scalar(color[2], color[0], color[1]), line_width, CV_AA);
     }
 
