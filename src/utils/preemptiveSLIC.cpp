@@ -917,17 +917,11 @@ void PreemptiveSLIC::preemptiveSLIC(const Mat& I_rgb, const int k, const double 
   PerformSuperpixelSLIC_preemptive(m_kseedsl, m_kseedsa, m_kseedsb, m_kseedsx, m_kseedsy, klabels, compactness);
   
   int numlabels = m_kseedsl.size();
-  int* nlabels = new int[sz];
-  EnforceLabelConnectivity(klabels, m_width, m_height, nlabels, numlabels, double(sz)/double(m_sx*m_sy));
+  labels = cv::Mat(m_height, m_width, CV_32SC1, cv::Scalar::all(0));
+  int *labels_ptr = labels.ptr<int>();
+  EnforceLabelConnectivity(klabels, m_width, m_height, labels_ptr, numlabels, double(sz)/double(m_sx*m_sy));
 
-  int* swapV = klabels;
-  klabels = nlabels;
-  nlabels = swapV;
-  
-  if(nlabels) delete [] nlabels;
-
-  labels = cv::Mat(m_height, m_width, CV_32SC1, klabels);
-
+  if(klabels) delete [] klabels;
 }
 
 

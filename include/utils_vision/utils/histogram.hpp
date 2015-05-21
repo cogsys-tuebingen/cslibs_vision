@@ -72,7 +72,8 @@ inline void prepare_params(cv::Mat &bins, cv::Mat &ranges, const int channel_cou
     }
 }
 
-typedef std::pair<float,float> Range;
+typedef std::pair<float,float>   Rangef;
+typedef std::pair<double,double> Ranged;
 
 /**
  * @brief Return a Range struct containing the upper and lower boundary of a type
@@ -80,7 +81,7 @@ typedef std::pair<float,float> Range;
  * @return          a Range struct
  */
 template<typename Tp>
-inline Range make_range()
+inline Ranged make_range()
 {
     return std::make_pair<float, float>(std::numeric_limits<Tp>::min(), std::numeric_limits<Tp>::max());
 }
@@ -93,7 +94,7 @@ inline Range make_range()
  * @return          a Range struct
  */
 template<typename Tp>
-inline Range make_min_max_range(const cv::Mat &src,
+inline Ranged make_min_max_range(const cv::Mat &src,
                                 const cv::Mat &mask = cv::Mat())
 {
     double min_val = std::numeric_limits<Tp>::min();
@@ -121,7 +122,7 @@ inline Range make_min_max_range(const cv::Mat &src,
  * @param accumulate    if accumulation should be used
  */
 inline void histogram(const std::vector<cv::Mat>  &channels, std::vector<cv::Mat> &histograms, const cv::Mat &mask,
-                      const std::vector<int> &bins, const std::vector<Range> &ranges,
+                      const std::vector<int> &bins, const std::vector<Rangef> &ranges,
                       bool uniform = true, bool accumulate = false)
 {
     assert(bins.size() == channels.size());
@@ -150,7 +151,7 @@ inline void histogram(const std::vector<cv::Mat>  &channels, std::vector<cv::Mat
  * @param accumulate    if accumulation should be used
  */
 inline void histogram(const cv::Mat &src, std::vector<cv::Mat> &histograms, const cv::Mat &mask,
-                      const std::vector<int> &bins, const std::vector<Range> &ranges,
+                      const std::vector<int> &bins, const std::vector<Rangef> &ranges,
                       bool uniform = true, bool accumulate = false)
 {
     std::vector<cv::Mat> channels;
@@ -202,8 +203,8 @@ template<typename _Tp>
 inline void histogram(const cv::Mat        &src,
                       const cv::Mat        &mask,
                       const cv::Mat        &clusters,
-                      const _Tp             range_min,
-                      const _Tp             range_max,
+                      const double          range_min,
+                      const double          range_max,
                       const int             bins,
                       const int             num_clusters,
                       std::vector<cv::Mat> &histograms)
@@ -214,7 +215,9 @@ inline void histogram(const cv::Mat        &src,
     assert(clusters.type() == CV_32SC1);
     assert(range_min < range_max);
 
-    histograms.resize(num_clusters, cv::Mat(1, bins, CV_32SC1, cv::Scalar::all(0)));
+    histograms.resize(num_clusters, cv::Mat());
+    for(cv::Mat &m : histograms)
+        m = cv::Mat(1, bins, CV_32SC1, cv::Scalar::all(0));
 
     const int    size = src.rows * src.cols;
     const double bin_size_inv = 1.0 / ((range_max - range_min) / (double) bins);
