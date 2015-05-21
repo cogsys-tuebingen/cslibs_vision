@@ -83,7 +83,7 @@ typedef std::pair<double,double> Ranged;
 template<typename Tp>
 inline Ranged make_range()
 {
-    return std::make_pair<float, float>(std::numeric_limits<Tp>::min(), std::numeric_limits<Tp>::max());
+    return std::make_pair(std::numeric_limits<Tp>::min(), std::numeric_limits<Tp>::max());
 }
 
 /**
@@ -108,7 +108,7 @@ inline Ranged make_min_max_range(const cv::Mat &src,
     } else {
         cv::minMaxLoc(src, &min_val, &max_val, NULL, NULL, mask);
     }
-    return std::make_pair<float, float>(min_val, max_val);
+    return std::make_pair(min_val, max_val);
 }
 
 /**
@@ -220,7 +220,7 @@ inline void histogram(const cv::Mat        &src,
         m = cv::Mat(1, bins, CV_32SC1, cv::Scalar::all(0));
 
     const int    size = src.rows * src.cols;
-    const double bin_size_inv = 1.0 / ((range_max - range_min) / (double) bins);
+    const double bin_size_inv = 1.0 / ((range_max - range_min) / (double) (bins - 1));
     const _Tp   *src_ptr     = src.ptr<_Tp>();
     const int   *cluster_ptr = clusters.ptr<int>();
     cv::Mat     *hist_ptr = histograms.data();
@@ -230,7 +230,11 @@ inline void histogram(const cv::Mat        &src,
             const _Tp &val = *src_ptr;
             if(val >= range_min && val <= range_max) {
                 int *bins_ptr = hist_ptr[*cluster_ptr].ptr<int>();
-                int bin = floor(val * bin_size_inv);
+                int bin = floor((val - range_min) * bin_size_inv);
+                assert(bin >= 0);
+                assert(bin <  bins);
+                assert(*cluster_ptr >= 0);
+                assert(*cluster_ptr < num_clusters);
                 ++(bins_ptr[bin]);
             }
         }
