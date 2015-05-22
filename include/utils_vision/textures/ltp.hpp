@@ -77,6 +77,24 @@ public:
         }
     }
 
+
+    static inline void centerSymmetric(const cv::Mat &src,
+                                       const double k,
+                                       cv::Mat &dst)
+    {
+        switch(src.type()) {
+        case CV_8UC1: _centerSymmetric<uchar>(src, k, dst);  break;
+        case CV_8SC1: _centerSymmetric<char>(src, k, dst);   break;
+        case CV_16UC1:_centerSymmetric<ushort>(src, k, dst); break;
+        case CV_16SC1:_centerSymmetric<short>(src, k, dst);  break;
+        case CV_32SC1:_centerSymmetric<int>(src, k, dst);    break;
+        case CV_32FC1:_centerSymmetric<float>(src, k, dst);  break;
+        case CV_64FC1:_centerSymmetric<double>(src, k, dst); break;
+        default: throw std::runtime_error("Unsupported matrix type!");
+        }
+    }
+
+
     static inline void shortened(const cv::Mat &src,
                                        const double k,
                                        cv::Mat &dst)
@@ -148,6 +166,39 @@ private:
                 entry[1] = code_pos;
             }
         }
+    }
+
+    template <typename _Tp>
+    static inline void _centerSymmetric(const cv::Mat& src,
+                                         const double k,
+                                         cv::Mat& dst)
+    {
+        dst = cv::Mat_<cv::Vec2b>(src.rows-2, src.cols-2, cv::Vec2b());
+        double diff = 0.0;
+        unsigned char code_neg = 0;
+        unsigned char code_pos = 0;
+        for(int i = 1 ; i < src.rows-1 ;++i) {
+            for(int j=1 ; j < src.cols-1; ++j) {
+                cv::Vec2b &entry = dst.at<cv::Vec2b>(i-1,j-1);
+                code_neg = 0;
+                code_pos = 0;
+                diff = src.at<_Tp>(i-1, j-1) - src.at<_Tp>(i+1,j+1);
+                code_pos |= (diff >= k) << 3;
+                code_neg |= (diff <  k) << 3;
+                diff = src.at<_Tp>(i-1,j)    - src.at<_Tp>(i+1,j);
+                code_pos |= (diff >= k) << 2;
+                code_neg |= (diff <  k) << 2;
+                diff = src.at<_Tp>(i-1,j+1)  - src.at<_Tp>(i+1,j-1);
+                code_pos |= (diff >= k) << 1;
+                code_neg |= (diff <  k) << 1;
+                diff = src.at<_Tp>(i,j+1)    - src.at<_Tp>(i,j-1);
+                code_pos |= (diff >= k) << 0;
+                code_neg |= (diff <  k) << 0;
+                entry[0] = code_neg;
+                entry[1] = code_pos;
+            }
+        }
+
     }
 
     template <typename _Tp>
