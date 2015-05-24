@@ -41,7 +41,7 @@ public:
 
     template <typename _Tp>
     static inline void histogram(const cv::Mat &src,
-                                 const _Tp k,
+                                 const double k,
                                  std::vector<int> &dst)
     {
         cv::Mat tmp;

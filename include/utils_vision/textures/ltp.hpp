@@ -54,8 +54,8 @@ public:
 
     template <typename _Tp>
     static inline void histogram(const cv::Mat &src,
-                                     const _Tp k,
-                                     std::vector<int> &dst) {
+                                 const _Tp k,
+                                 std::vector<int> &dst) {
         cv::Mat tmp;
         histogram<_Tp>(src, k, tmp);
         tmp.copyTo(dst);
@@ -96,8 +96,8 @@ public:
 
 
     static inline void shortened(const cv::Mat &src,
-                                       const double k,
-                                       cv::Mat &dst)
+                                 const double k,
+                                 cv::Mat &dst)
     {
         switch(src.type()) {
         case CV_8UC1: _shortened<uchar>(src, k, dst);  break;
@@ -137,31 +137,47 @@ private:
     {
         dst = cv::Mat_<cv::Vec2b>(src.rows-2, src.cols-2, cv::Vec2b());
 
+        const _Tp *src_ptr = src.ptr<_Tp>();
+        cv::Vec2b *dst_ptr = dst.ptr<cv::Vec2b>();
+
+        int           prev, pos, next = 0;
+        unsigned char code_neg = 0;
+        unsigned char code_pos = 0;
+        double center, center_minu_k, center_plus_k = 0.0;
+
         for(int i = 1 ; i < src.rows-1 ;++i) {
             for(int j=1 ; j < src.cols-1; ++j) {
-                cv::Vec2b &entry = dst.at<cv::Vec2b>(i-1,j-1);
-                double center = src.at<_Tp>(i,j);
-                unsigned char code_neg = 0;
-                unsigned char code_pos = 0;
-                double center_minu_k = center - k;
-                double center_plus_k = center + k;
+                cv::Vec2b &entry = dst_ptr[(i - 1) * dst.cols + j - 1];
 
-                code_pos |= (src.at<_Tp>(i-1,j-1)   >= center_plus_k) << 7;
-                code_neg |= (src.at<_Tp>(i-1,j-1)    < center_minu_k) << 7;
-                code_pos |= (src.at<_Tp>(i-1,j)     >= center_plus_k) << 6;
-                code_neg |= (src.at<_Tp>(i-1,j)      < center_minu_k) << 6;
-                code_pos |= (src.at<_Tp>(i-1,j+1)   >= center_plus_k) << 5;
-                code_neg |= (src.at<_Tp>(i-1,j+1)    < center_minu_k) << 5;
-                code_pos |= (src.at<_Tp>(i,j+1)     >= center_plus_k) << 4;
-                code_neg |= (src.at<_Tp>(i,j+1)      < center_minu_k) << 4;
-                code_pos |= (src.at<_Tp>(i+1,j+1)   >= center_plus_k) << 3;
-                code_neg |= (src.at<_Tp>(i+1,j+1)    < center_minu_k) << 3;
-                code_pos |= (src.at<_Tp>(i+1,j)     >= center_plus_k) << 2;
-                code_neg |= (src.at<_Tp>(i+1,j)      < center_minu_k) << 2;
-                code_pos |= (src.at<_Tp>(i+1,j-1)   >= center_plus_k) << 1;
-                code_neg |= (src.at<_Tp>(i+1,j-1)    < center_minu_k) << 1;
-                code_pos |= (src.at<_Tp>(i,j-1)     >= center_plus_k) << 0;
-                code_neg |= (src.at<_Tp>(i,j-1)      < center_minu_k) << 0;
+                prev = (i - 1) * src.cols + j;
+                pos  = i * src.cols + j;
+                next = (i + 1) * src.cols + j;
+                center = src_ptr[pos] + k;
+
+                code_neg = 0;
+                code_pos = 0;
+                center_minu_k = center - k;
+                center_plus_k = center + k;
+
+                code_pos |= (src_ptr[prev - 1] >= center_plus_k) << 7;
+                code_neg |= (src_ptr[prev - 1] < center_minu_k)  << 7;
+                code_pos |= (src_ptr[prev]     >= center_plus_k) << 6;
+                code_neg |= (src_ptr[prev]     < center_minu_k)  << 6;
+                code_pos |= (src_ptr[prev + 1] >= center_plus_k) << 5;
+                code_neg |= (src_ptr[prev + 1] < center_minu_k)  << 5;
+
+                code_pos |= (src_ptr[pos  - 1] >= center_plus_k) << 0;
+                code_neg |= (src_ptr[pos  - 1] < center_minu_k)  << 0;
+                code_pos |= (src_ptr[pos  + 1] >= center_plus_k) << 4;
+                code_neg |= (src_ptr[pos  + 1] < center_minu_k)  << 4;
+
+                code_pos |= (src_ptr[next - 1] >= center_plus_k) << 1;
+                code_neg |= (src_ptr[next - 1] < center_minu_k)  << 1;
+                code_pos |= (src_ptr[next]     >= center_plus_k) << 2;
+                code_neg |= (src_ptr[next]     < center_minu_k)  << 2;
+                code_pos |= (src_ptr[next + 1] >= center_plus_k) << 3;
+                code_neg |= (src_ptr[next + 1] < center_minu_k)  << 3;
+
                 entry[0] = code_neg;
                 entry[1] = code_pos;
             }
@@ -170,41 +186,52 @@ private:
 
     template <typename _Tp>
     static inline void _centerSymmetric(const cv::Mat& src,
-                                         const double k,
-                                         cv::Mat& dst)
+                                        const double k,
+                                        cv::Mat& dst)
     {
         dst = cv::Mat_<cv::Vec2b>(src.rows-2, src.cols-2, cv::Vec2b());
+
+        const _Tp *src_ptr = src.ptr<_Tp>();
+        cv::Vec2b *dst_ptr = dst.ptr<cv::Vec2b>();
+
         double diff = 0.0;
+        int           upper, lower = 0;
         unsigned char code_neg = 0;
         unsigned char code_pos = 0;
+
         for(int i = 1 ; i < src.rows-1 ;++i) {
             for(int j=1 ; j < src.cols-1; ++j) {
-                cv::Vec2b &entry = dst.at<cv::Vec2b>(i-1,j-1);
+                cv::Vec2b &entry = dst_ptr[(i-1) * dst.cols + j-1];
+
+                upper = (i - 1) * src.cols + j-1;
+                lower = (i + 1) * src.cols + j-1;
+
                 code_neg = 0;
                 code_pos = 0;
-                diff = src.at<_Tp>(i-1, j-1) - src.at<_Tp>(i+1,j+1);
+
+                diff=src_ptr[upper]-src_ptr[lower + 2];
                 code_pos |= (diff >= k) << 3;
                 code_neg |= (diff <  k) << 3;
-                diff = src.at<_Tp>(i-1,j)    - src.at<_Tp>(i+1,j);
+                diff=src_ptr[upper+1]-src_ptr[lower+1];
                 code_pos |= (diff >= k) << 2;
                 code_neg |= (diff <  k) << 2;
-                diff = src.at<_Tp>(i-1,j+1)  - src.at<_Tp>(i+1,j-1);
+                diff=src_ptr[upper+2]-src_ptr[lower];
                 code_pos |= (diff >= k) << 1;
                 code_neg |= (diff <  k) << 1;
-                diff = src.at<_Tp>(i,j+1)    - src.at<_Tp>(i,j-1);
+                diff=src_ptr[upper + src.cols + 2]-src_ptr[upper+src.cols];
                 code_pos |= (diff >= k) << 0;
                 code_neg |= (diff <  k) << 0;
+
                 entry[0] = code_neg;
                 entry[1] = code_pos;
             }
         }
-
     }
 
     template <typename _Tp>
     static inline void _shortened(const cv::Mat &src,
-                                        const double k,
-                                        cv::Mat &dst)
+                                  const double k,
+                                  cv::Mat &dst)
     {
         static const unsigned char lut[8][3] = {{0,8,16},
                                                 {1,9,17},
@@ -215,16 +242,22 @@ private:
                                                 {6,14,22},
                                                 {7,15,23}};
 
-        double thresholdneg = -k;
         dst = cv::Mat_<uchar>(src.rows-2, src.cols-2, (uchar) 0);
+
+        const _Tp *src_ptr = src.ptr<_Tp>();
+        uchar *dst_ptr = dst.ptr<uchar>();
+
+        double thresholdneg = -k;
         double diff = 0.0;
-        double max  = 0.0;
-        double min  = 255.0;
+
+        _Tp center = 0;
+        unsigned char code = 0;
 
         for(int i=1 ; i < src.rows-1 ; ++i) {
             for(int j=1 ; j<src.cols-1 ; ++j) {
-                _Tp center = src.at<_Tp>(i,j);
-                unsigned char code = 0;
+
+                code = 0;
+                center = src_ptr[i * src.cols + j];
 
                 //// ------------------------------
                 diff=src.at<_Tp>(i-1,j-1) - center;
@@ -292,12 +325,8 @@ private:
                     code+=lut[7][1];
 
                 //// ------------------------------
-                dst.at<unsigned char>(i-1,j-1) = code;
-                //cout<<(int)code<<" ";
-                if(code > max)
-                    max = (double) code;
-                if(code<min)
-                    min = (double) code;
+                dst_ptr[(i-1) * dst.cols + j-1] = code;
+
             }
         }
     }
@@ -311,30 +340,46 @@ private:
                                  cv::Mat& dst) {
         int n = std::max(std::min(neighbours,31),1); // set bounds...
         dst = cv::Mat_<cv::Vec2i>(src.rows-2*radius, src.cols-2*radius, cv::Vec2i());
+
+        const _Tp *src_ptr = src.ptr<_Tp>();
+        cv::Vec2i *dst_ptr = dst.ptr<cv::Vec2i>();
+
+        double x, y, tx, ty, w1, w2, w3, w4, cpk, cmk, t= 0.0;
+        int fx, fy, cx, cy, pos_cy, pos_fy, pos = 0;
+
         for(int m=0; m<n; ++m) {
             // sample points
-            double x = static_cast<double>(radius) * cos(2.0*M_PI*m/static_cast<float>(n));
-            double y = static_cast<double>(radius) * -sin(2.0*M_PI*m/static_cast<float>(n));
+            x  = (double) radius * cos(2.0*M_PI*m / (double) n);
+            y  = (double) radius *-sin(2.0*M_PI*m / (double) n);
             // relative indices
-            int fx = static_cast<int>(floor(x));
-            int fy = static_cast<int>(floor(y));
-            int cx = static_cast<int>(ceil(x));
-            int cy = static_cast<int>(ceil(y));
+            fx = floor(x);
+            fy = floor(y);
+            cx = ceil(x);
+            cy = ceil(y);
             // fractional part
-            float ty = y - fy;
-            float tx = x - fx;
+            ty = y - fy;
+            tx = x - fx;
             // set interpolation weights
-            double w1 = (1 - tx) * (1 - ty);
-            double w2 =      tx  * (1 - ty);
-            double w3 = (1 - tx) *      ty;
-            double w4 =      tx  *      ty;
+            w1 = (1 - tx) * (1 - ty);
+            w2 =      tx  * (1 - ty);
+            w3 = (1 - tx) *      ty;
+            w4 =      tx  *      ty;
             // iterate through your data
             for(int i=radius; i < src.rows-radius;i++) {
                 for(int j=radius;j < src.cols-radius;j++) {
-                    double t = w1*src.at<_Tp>(i+fy,j+fx) + w2*src.at<_Tp>(i+fy,j+cx) + w3*src.at<_Tp>(i+cy,j+fx) + w4*src.at<_Tp>(i+cy,j+cx);
-                    double cmk = src.at<_Tp>(i,j) - k;
-                    double cpk = src.at<_Tp>(i,j) + k;
-                    cv::Vec2i &entry = dst.at<cv::Vec2i>(i-radius, j-radius);
+                    cv::Vec2i &entry =  dst_ptr[(i -radius) * dst.cols + j - radius];
+                    pos_cy = (i + cy) * src.cols + j;
+                    pos_fy = (i + fy) * src.cols + j;
+                    pos = (i * src.cols) + j;
+                    t = w1 * src_ptr[pos_fy + fx] +
+                            w2 * src_ptr[pos_fy + cx] +
+                            w3 * src_ptr[pos_cy + fx] +
+                            w4 * src_ptr[pos_cy + cx];
+
+
+                    cmk = src_ptr[pos] - k;
+                    cpk = src_ptr[pos] + k;
+
                     entry[0] += ((t >= cpk ) && (abs(t - cpk) > std::numeric_limits<double>::epsilon())) << m;
                     entry[1] += ((t <  cmk ) && (abs(t - cpk) > std::numeric_limits<double>::epsilon())) << m;
                 }
