@@ -147,11 +147,11 @@ private:
 
         for(int i = 1 ; i < src.rows-1 ;++i) {
             for(int j=1 ; j < src.cols-1; ++j) {
-                cv::Vec2b &entry = dst_ptr[(i - 1) * dst.cols + j - 1];
+                cv::Vec2b &entry = *dst_ptr;
 
-                prev = (i - 1) * src.cols + j;
                 pos  = i * src.cols + j;
-                next = (i + 1) * src.cols + j;
+                prev = pos - src.cols;
+                next = pos + src.cols;
                 center = src_ptr[pos] + k;
 
                 code_neg = 0;
@@ -180,6 +180,8 @@ private:
 
                 entry[0] = code_neg;
                 entry[1] = code_pos;
+
+                ++dst_ptr;
             }
         }
     }
@@ -201,7 +203,7 @@ private:
 
         for(int i = 1 ; i < src.rows-1 ;++i) {
             for(int j=1 ; j < src.cols-1; ++j) {
-                cv::Vec2b &entry = dst_ptr[(i-1) * dst.cols + j-1];
+                cv::Vec2b &entry = *dst_ptr;
 
                 upper = (i - 1) * src.cols + j-1;
                 lower = (i + 1) * src.cols + j-1;
@@ -224,6 +226,7 @@ private:
 
                 entry[0] = code_neg;
                 entry[1] = code_pos;
+                ++dst_ptr;
             }
         }
     }
@@ -325,7 +328,8 @@ private:
                     code+=lut[7][1];
 
                 //// ------------------------------
-                dst_ptr[(i-1) * dst.cols + j-1] = code;
+                *dst_ptr = code;
+                ++dst_ptr;
 
             }
         }
@@ -365,9 +369,10 @@ private:
             w3 = (1 - tx) *      ty;
             w4 =      tx  *      ty;
             // iterate through your data
+            dst_ptr = dst.ptr<cv::Vec2i>();
             for(int i=radius; i < src.rows-radius;i++) {
                 for(int j=radius;j < src.cols-radius;j++) {
-                    cv::Vec2i &entry =  dst_ptr[(i -radius) * dst.cols + j - radius];
+                    cv::Vec2i &entry =  *dst_ptr;
                     pos_cy = (i + cy) * src.cols + j;
                     pos_fy = (i + fy) * src.cols + j;
                     pos = (i * src.cols) + j;
@@ -382,6 +387,7 @@ private:
 
                     entry[0] += ((t >= cpk ) && (abs(t - cpk) > std::numeric_limits<double>::epsilon())) << m;
                     entry[1] += ((t <  cmk ) && (abs(t - cpk) > std::numeric_limits<double>::epsilon())) << m;
+                    ++dst_ptr;
                 }
             }
         }

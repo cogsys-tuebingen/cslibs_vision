@@ -51,8 +51,8 @@ private:
         float *var_ptr = var.ptr<float>();
         float *gre_ptr = gre.ptr<float>();
 
-        int           prev, pos, next = 0;
-        int           pos_gre = 0;
+        int    prev, pos, next = 0;
+        int    pos_gre = 0;
 
         double max_var=-1.0;
         double max_gre=-1.0;
@@ -62,14 +62,14 @@ private:
 
         for(int i=1 ; i<src.rows-1 ; ++i) {
             for(int j=1 ; j<src.cols-1 ; ++j) {
-                prev = (i - 1) * src.cols + j;
                 pos  = i * src.cols + j;
-                next = (i + 1) * src.cols + j;
+                prev = pos - src.cols;
+                next = pos + src.cols;
                 pos_gre = (i-1) * gre.cols + j-1;
 
                 ave = (src_ptr[prev - 1] + src_ptr[prev] + src_ptr[prev + 1] +
-                        src_ptr[pos  - 1] + src_ptr[pos]  + src_ptr[pos  + 1] +
-                        src_ptr[next - 1] + src_ptr[next] + src_ptr[next + 1]) / 9.0;
+                       src_ptr[pos  - 1] + src_ptr[pos]  + src_ptr[pos  + 1] +
+                       src_ptr[next - 1] + src_ptr[next] + src_ptr[next + 1]) / 9.0;
 
                 diffs[0] = src_ptr[prev - 1] - ave;
                 diffs[1] = src_ptr[prev    ] - ave;
@@ -81,9 +81,15 @@ private:
                 diffs[7] = src_ptr[next    ] - ave;
                 diffs[8] = src_ptr[next + 1] - ave;
 
-                var_ptr[pos_gre] = sqrt((diffs[0]+diffs[1]+diffs[2]+
-                                         diffs[3]+diffs[4]+diffs[5]+
-                                         diffs[6]+diffs[7]+diffs[8]) / 9.0);
+                var_ptr[pos_gre] = sqrt((diffs[0]*diffs[0]+
+                                         diffs[1]*diffs[1]+
+                                         diffs[2]*diffs[2]+
+                                         diffs[3]*diffs[3]+
+                                         diffs[4]*diffs[4]+
+                                         diffs[5]*diffs[5]+
+                                         diffs[6]*diffs[6]+
+                                         diffs[7]*diffs[7]+
+                                         diffs[8]*diffs[8]) / 9.0);
 
                 if(var_ptr[pos_gre] > max_var)
                     max_var=var_ptr[pos_gre];
@@ -115,62 +121,9 @@ private:
     static inline void _texture(const cv::Mat &src,
                                 cv::Mat &dst)
     {
-        dst = cv::Mat_<uchar>(src.rows, src.cols, (uchar) 0);
-        cv::Mat var = cv::Mat_<float>(src.rows-2, src.cols-2, 0.f);
-        cv::Mat gre = cv::Mat_<float>(src.rows-2, src.cols-2, 0.f);
-
-        double max_var=-1.0;
-        double max_gre=-1.0;
-        for(int i=1;i<src.rows-1;++i) {
-            for(int j=1;j<src.cols-1;++j) {
-                double ave=(src.at<_Tp>(i-1,j-1)+src.at<_Tp>(i-1,j)+src.at<_Tp>(i-1,j+1)
-                            +src.at<_Tp>(i,j+1)+src.at<_Tp>(i+1,j+1)+src.at<_Tp>(i+1,j)
-                            +src.at<_Tp>(i+1,j-1)+src.at<_Tp>(i,j-1)+src.at<_Tp>(i,j))/9.0;
-                var.at<float>(i-1,j-1)=sqrt(((src.at<_Tp>(i-1,j-1)-ave)*(src.at<_Tp>(i-1,j-1)-ave)+
-                                             (src.at<_Tp>(i-1,j)-ave)*(src.at<_Tp>(i-1,j)-ave)+
-                                             (src.at<_Tp>(i-1,j+1)-ave)*(src.at<_Tp>(i-1,j+1)-ave)+
-                                             (src.at<_Tp>(i,j+1)-ave)*(src.at<_Tp>(i,j+1)-ave)+
-                                             (src.at<_Tp>(i+1,j+1)-ave)*(src.at<_Tp>(i+1,j+1)-ave)+
-                                             (src.at<_Tp>(i+1,j)-ave)*(src.at<_Tp>(i+1,j)-ave)+
-                                             (src.at<_Tp>(i+1,j-1)-ave)*(src.at<_Tp>(i+1,j-1)-ave)+
-                                             (src.at<_Tp>(i,j-1)-ave)*(src.at<_Tp>(i,j-1)-ave)+
-                                             (src.at<_Tp>(i,j)-ave)*(src.at<_Tp>(i,j)-ave))/9.0);
-                if(var.at<float>(i-1,j-1)>max_var)
-                    max_var=var.at<float>(i-1,j-1);
-                double gre_x = src.at<_Tp>(i-1,j+1) - src.at<_Tp>(i-1,j-1) +
-                        src.at<_Tp>(i,j+1)*2 - src.at<_Tp>(i,j-1)*2 +
-                        src.at<_Tp>(i+1,j+1) - src.at<_Tp>(i+1,j-1);
-                double gre_y=  src.at<_Tp>(i+1,j-1) - src.at<_Tp>(i-1,j-1) +
-                        src.at<_Tp>(i+1,j)*2 - src.at<_Tp>(i-1,j)*2 +
-                        src.at<_Tp>(i+1,j+1) - src.at<_Tp>(i-1,j+1);
-                gre.at<float>(i-1,j-1)=sqrt(gre_x*gre_x+gre_y*gre_y);
-                if(gre.at<float>(i-1,j-1)>max_gre)
-                    max_gre=gre.at<float>(i-1,j-1);
-            }
-        }
-
-        for(int i=1;i<src.rows-1;++i) {
-            for(int j=1;j<src.cols-1;++j) {
-                double tempvalue = 1.0-var.at<float>(i-1,j-1)/max_var;
-                dst.at<unsigned char>(i,j) = (unsigned char) (tempvalue*255.0);
-            }
-        }
-
-
-        for(int i=1;i<src.rows-1;++i)
-        {
-            dst.at<unsigned char>(i,0)=dst.at<unsigned char>(i,1);
-            dst.at<unsigned char>(i,src.cols-1)=dst.at<unsigned char>(i,src.cols-2);
-        }
-        for(int j=1;j<src.cols-1;++j)
-        {
-            dst.at<unsigned char>(0,j)=dst.at<unsigned char>(1,j);
-            dst.at<unsigned char>(src.rows-1,j)=dst.at<unsigned char>(src.rows-2,j);
-        }
-        dst.at<unsigned char>(0,0)=dst.at<unsigned char>(1,1);
-        dst.at<unsigned char>(src.rows-1,0)=dst.at<unsigned char>(src.rows-2,1);
-        dst.at<unsigned char>(0,src.cols-1)=dst.at<unsigned char>(1,src.cols-2);
-        dst.at<unsigned char>(src.rows-1,src.cols-1)=dst.at<unsigned char>(src.rows-2,src.cols-2);
+        _standard<_Tp>(src, dst);
+        cv::Mat inner(dst, cv::Rect(1,1,dst.cols-2, dst.rows-2));
+        cv::copyMakeBorder(inner, dst, 1, 1, 1, 1, cv::BORDER_REFLECT);
     }
 
 };

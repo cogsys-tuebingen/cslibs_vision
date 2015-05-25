@@ -134,9 +134,10 @@ private:
 
         for(int i = 1 ; i < src.rows-1 ;++i) {
             for(int j=1 ; j < src.cols-1; ++j) {
-                prev = (i - 1) * src.cols + j;
                 pos  = i * src.cols + j;
-                next = (i + 1) * src.cols + j;
+                prev = pos - src.cols;
+                next = pos + src.cols;
+
                 center = src_ptr[pos] + k;
                 code = 0;
 
@@ -151,7 +152,8 @@ private:
                 code |= (src_ptr[next]     > center) << 2;
                 code |= (src_ptr[next + 1] > center) << 3;
 
-                dst_ptr[(i-1) * dst.cols + j - 1] = code;
+                *dst_ptr = code;
+                ++dst_ptr;
             }
         }
     }
@@ -191,6 +193,8 @@ private:
             w3 = (1 - tx) *      ty;
             w4 =      tx  *      ty;
             // iterate through your data
+
+            dst_ptr = dst.ptr<int>();
             for(int i=radius; i < src.rows-radius; ++i) {
                 for(int j=radius;j < src.cols-radius; ++j) {
                     pos_cy = (i + cy) * src.cols + j;
@@ -203,9 +207,9 @@ private:
 
                     center = src_ptr[pos] + k;
                     // we are dealing with floating point precision, so add some little tolerance
-                    dst_ptr[(i -radius) * dst.cols + j - radius]
-                            += ((t > center) &&
+                    *dst_ptr += ((t > center) &&
                                 (std::abs(t - (center) > std::numeric_limits<double>::epsilon()))) << m;
+                     ++dst_ptr;
                 }
             }
         }
@@ -272,11 +276,12 @@ private:
 
         int i_dst = 0;
         int j_dst = 0;
-        const float norm = n - 1;
+        const float norm_inv = 1.f / ((float) n - 1);
         for(int i = radius; i < src.rows-radius; ++i,++i_dst) {
             j_dst = 0;
             for(int j = radius; j < src.cols-radius; ++j,++j_dst) {
-                dst_ptr[i_dst * dst.cols + j_dst] = _m2_ptr[i * _m2.cols + j] / norm;
+                *dst_ptr =  _m2_ptr[i * _m2.cols + j] * norm_inv;
+                ++dst_ptr;
             }
         }
     }
@@ -300,7 +305,6 @@ private:
             for(int j=1 ; j < src.cols-1; ++j) {
                 upper = (i - 1) * src.cols + j-1;
                 lower = (i + 1) * src.cols + j-1;
-
                 code = 0;
                 diff=src_ptr[upper]-src_ptr[lower + 2];
                 code |= ( diff> k ) << 3;
@@ -310,7 +314,8 @@ private:
                 code |= ( diff> k ) << 1;
                 diff=src_ptr[upper + src.cols + 2]-src_ptr[upper+src.cols];
                 code |= ( diff> k ) << 0;
-                dst_ptr[(i-1) * dst.cols + j-1] = code;
+                *dst_ptr = code;
+                ++dst_ptr;
             }
         }
 

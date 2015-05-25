@@ -5,13 +5,15 @@
 #define M_PI_8 0.39269908169872415481
 #define SHORTENED  31.0  / M_PI
 #define STANDARD   127.0 / M_PI
+#define THRESHOLD_1 M_PI_8
+#define THRESHOLD_2 M_PI*3.0/8.0
+#define THREHSOLD_3 M_PI*5.0/8.0
+#define THRESHOLD_4 M_PI*7.0/8.0
 
 namespace utils_vision {
 class WLD : public TextureDescriptor
 {
 public:
-
-
     static inline void standard(const cv::Mat &src,
                                 cv::Mat &dst)
     {
@@ -64,19 +66,33 @@ private:
     {
         dst = cv::Mat_<uchar>(src.rows-2, src.cols-2, (uchar) 0);
 
-        double alpha=3.0;
-        double belta=0.0;
+        const _Tp *src_ptr = src.ptr<_Tp>();
+        uchar     *dst_ptr = dst.ptr<uchar>();
+
+        double alpha=3.0, beta=0.0,diff=0.0,sigma=0.0;
+        _Tp center = 0;
+        int prev, pos, next = 0;
+        uchar code = 0;
+        int tmp_code = 0;
+
         for(int i=1 ; i<src.rows-1 ; ++i) {
             for(int j=1 ; j<src.cols-1 ; ++j) {
-                _Tp center = src.at<_Tp>(i,j);
-                unsigned char code = 0;
-                double diff=src.at<_Tp>(i-1,j-1)+src.at<_Tp>(i-1,j)+src.at<_Tp>(i-1,j+1)
-                       +src.at<_Tp>(i,j+1)+src.at<_Tp>(i+1,j+1)+src.at<_Tp>(i+1,j)
-                       +src.at<_Tp>(i+1,j-1)+src.at<_Tp>(i,j-1)-8.0*center;
-                double sigma=atan2(diff*alpha, belta+center);
-                int tempcode=(int)((sigma+M_PI_2) * STANDARD);
-                code=(unsigned char)tempcode;
-                dst.at<unsigned char>(i-1,j-1) = code;
+                pos  = i * src.cols + j;
+                prev = pos - src.cols;
+                next = pos + src.cols;
+
+                center = src_ptr[pos];
+                code = 0;
+                diff = src_ptr[prev-1] + src_ptr[prev] + src_ptr[prev+1] +
+                       src_ptr[pos-1] + src_ptr[pos+1] +
+                       src_ptr[next-1] + src_ptr[next] + src_ptr[next+1] -
+                       8.0 * center;
+
+                sigma    = atan2(diff*alpha, beta+center);
+                tmp_code = (int)((sigma+M_PI_2) * STANDARD);
+                code = (unsigned char) tmp_code;
+                *dst_ptr = code;
+                ++dst_ptr;
             }
         }
     }
@@ -86,19 +102,36 @@ private:
                                   cv::Mat &dst)
     {
         dst = cv::Mat_<uchar>(src.rows-2, src.cols-2, (uchar) 0);
-        double alpha=3.0;
-        double belta=1.0;
-        for(int i=1;i<src.rows-1;i++) {
-            for(int j=1;j<src.cols-1;j++) {
-                _Tp center = src.at<_Tp>(i,j);
-                unsigned char code = 0;
-                double diff=src.at<_Tp>(i-1,j-1)+src.at<_Tp>(i-1,j)+src.at<_Tp>(i-1,j+1)
-                       +src.at<_Tp>(i,j+1)+src.at<_Tp>(i+1,j+1)+src.at<_Tp>(i+1,j)
-                       +src.at<_Tp>(i+1,j-1)+src.at<_Tp>(i,j-1)-8.0*center;
-                double sigma=atan2(diff*alpha, belta+center);
-                int tempcode=(int)((sigma+M_PI_2) * SHORTENED);
-                code = (unsigned char) tempcode;
-                dst.at<unsigned char>(i-1,j-1) = code;
+
+        const _Tp *src_ptr = src.ptr<_Tp>();
+        uchar     *dst_ptr = dst.ptr<uchar>();
+
+        double alpha=3.0, beta=1.0,diff=0.0,sigma=0.0;
+        _Tp center = 0;
+        int prev, pos, next = 0;
+        uchar code = 0;
+        int tmp_code = 0;
+
+        for(int i=1;i<src.rows-1;++i) {
+            for(int j=1;j<src.cols-1;++j) {
+                pos  = i * src.cols + j;
+                prev = pos - src.cols;
+                next = pos + src.cols;
+
+                center = src_ptr[pos];
+                code = 0;
+
+                diff = src_ptr[prev-1] + src_ptr[prev] + src_ptr[prev+1] +
+                       src_ptr[pos-1] + src_ptr[pos+1] +
+                       src_ptr[next-1] + src_ptr[next] + src_ptr[next+1] -
+                       8.0 * center;
+
+
+                sigma=atan2(diff*alpha, beta+center);
+                tmp_code=(int)((sigma+M_PI_2) * SHORTENED);
+                code = (unsigned char) tmp_code;
+                *dst_ptr = code;
+                ++dst_ptr;
             }
         }
     }
@@ -108,33 +141,43 @@ private:
                                  cv::Mat &dst)
     {
         dst = cv::Mat_<uchar>(src.rows-2, src.cols-2, (uchar) 0);
-        const double threshold1=M_PI_8;
-        const double threshold2=M_PI*3.0/8.0;
-        const double threshold3=M_PI*5.0/8.0;
-        const double threshold4=M_PI*7.0/8.0;
+
+        const _Tp *src_ptr = src.ptr<_Tp>();
+        uchar     *dst_ptr = dst.ptr<uchar>();
+        uchar code = 0;
+
+        double diff1, diff2, theta = 0.0;
+        int prev, pos, next = 0;
+
         for(int i=1 ; i<src.rows-1 ; ++i) {
             for(int j=1 ; j<src.cols-1 ; ++j) {
-                unsigned char code = 0;
-                double diff1=src.at<_Tp>(i+1,j)-src.at<_Tp>(i-1,j);
-                double diff2=src.at<_Tp>(i,j-1)-src.at<_Tp>(i,j+1);
-                double theta=atan2(diff2, diff1);
-                if(theta<threshold1&&theta>=-threshold1)
+                pos  = i * src.cols + j;
+                prev = pos - src.cols;
+                next = pos + src.cols;
+
+                code  = 0;
+                diff1 = src_ptr[next]-src_ptr[prev];
+                diff2 = src_ptr[pos-1]-src_ptr[pos+1];
+                theta=atan2(diff2, diff1);
+
+                if(theta<THRESHOLD_1&&theta>=-THRESHOLD_1)
                     code=0;
-                else if(theta<threshold2&&theta>=threshold1)
+                else if(theta<THRESHOLD_2&&theta>=THRESHOLD_1)
                     code=1;
-                else if(theta<threshold3&&theta>=threshold2)
+                else if(theta<THREHSOLD_3&&theta>=THRESHOLD_2)
                     code=2;
-                else if(theta<threshold4&&theta>=threshold3)
+                else if(theta<THRESHOLD_4&&theta>=THREHSOLD_3)
                     code=3;
-                else if(theta<-threshold1&&theta>=-threshold2)
+                else if(theta<-THRESHOLD_1&&theta>=-THRESHOLD_2)
                     code=7;
-                else if(theta<-threshold2&&theta>=-threshold3)
+                else if(theta<-THRESHOLD_2&&theta>=-THREHSOLD_3)
                     code=6;
-                else if(theta<-threshold3&&theta>=-threshold4)
+                else if(theta<-THREHSOLD_3&&theta>=-THRESHOLD_4)
                     code=5;
                 else
                     code=4;
-                dst.at<unsigned char>(i-1,j-1) = code;
+                *dst_ptr = code;
+                ++dst_ptr;
             }
         }
     }
