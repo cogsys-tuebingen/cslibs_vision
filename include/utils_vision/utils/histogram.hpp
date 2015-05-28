@@ -217,7 +217,7 @@ inline void histogram(const cv::Mat        &src,
 
     histograms.resize(num_clusters, cv::Mat());
     for(cv::Mat &m : histograms)
-        m = cv::Mat(1, bins, CV_32SC1, cv::Scalar::all(0));
+        m = cv::Mat(bins, 1, CV_32SC1, cv::Scalar::all(0));
 
     const int    size = src.rows * src.cols;
     const double bin_size_inv = 1.0 / ((range_max - range_min) / (double) (bins - 1));
