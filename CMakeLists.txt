@@ -18,23 +18,20 @@ find_package(catkin REQUIRED COMPONENTS cv_bridge utils_param cmake_modules)
 # note to ubuntu 14 users: if opencv is installed at /usr/local and is not found:    sudo ldconfig /usr/local/lib
 find_package(OpenCV REQUIRED)
 
-find_package(Eigen QUIET)
-if(NOT ${Eigen_FOUND})
-  find_package(Eigen3 REQUIRED)
-endif()
-include_directories(${EIGEN_INCLUDE_DIRS})
+find_package(Eigen3 REQUIRED)
 
 find_package(Boost COMPONENTS program_options serialization REQUIRED)
 
 catkin_package(
-    INCLUDE_DIRS include
+    INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIR}
     LIBRARIES utils_vision logger
     CATKIN_DEPENDS utils_param
-    DEPENDS Eigen
+    DEPENDS Eigen3
 )
 
 include_directories(include
     ${catkin_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIR}
 )
 
 set(NONFREE_FOUND false)
