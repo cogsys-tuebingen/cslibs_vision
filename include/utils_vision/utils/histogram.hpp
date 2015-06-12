@@ -72,7 +72,8 @@ inline void prepare_params(cv::Mat &bins, cv::Mat &ranges, const int channel_cou
     }
 }
 
-typedef std::pair<float,float> Range;
+typedef std::pair<float,float>   Rangef;
+typedef std::pair<double,double> Ranged;
 
 /**
  * @brief Return a Range struct containing the upper and lower boundary of a type
@@ -80,9 +81,9 @@ typedef std::pair<float,float> Range;
  * @return          a Range struct
  */
 template<typename Tp>
-inline Range make_range()
+inline Ranged make_range()
 {
-    return std::make_pair<float, float>(std::numeric_limits<Tp>::min(), std::numeric_limits<Tp>::max());
+    return std::make_pair(std::numeric_limits<Tp>::min(), std::numeric_limits<Tp>::max());
 }
 
 /**
@@ -93,7 +94,7 @@ inline Range make_range()
  * @return          a Range struct
  */
 template<typename Tp>
-inline Range make_min_max_range(const cv::Mat &src,
+inline Ranged make_min_max_range(const cv::Mat &src,
                                 const cv::Mat &mask = cv::Mat())
 {
     double min_val = std::numeric_limits<Tp>::min();
@@ -107,7 +108,7 @@ inline Range make_min_max_range(const cv::Mat &src,
     } else {
         cv::minMaxLoc(src, &min_val, &max_val, NULL, NULL, mask);
     }
-    return std::make_pair<float, float>(min_val, max_val);
+    return std::make_pair(min_val, max_val);
 }
 
 /**
@@ -121,7 +122,7 @@ inline Range make_min_max_range(const cv::Mat &src,
  * @param accumulate    if accumulation should be used
  */
 inline void histogram(const std::vector<cv::Mat>  &channels, std::vector<cv::Mat> &histograms, const cv::Mat &mask,
-                      const std::vector<int> &bins, const std::vector<Range> &ranges,
+                      const std::vector<int> &bins, const std::vector<Rangef> &ranges,
                       bool uniform = true, bool accumulate = false)
 {
     assert(bins.size() == channels.size());
@@ -150,7 +151,7 @@ inline void histogram(const std::vector<cv::Mat>  &channels, std::vector<cv::Mat
  * @param accumulate    if accumulation should be used
  */
 inline void histogram(const cv::Mat &src, std::vector<cv::Mat> &histograms, const cv::Mat &mask,
-                      const std::vector<int> &bins, const std::vector<Range> &ranges,
+                      const std::vector<int> &bins, const std::vector<Rangef> &ranges,
                       bool uniform = true, bool accumulate = false)
 {
     std::vector<cv::Mat> channels;
@@ -188,6 +189,121 @@ inline void histogram(const cv::Mat &src, std::vector<cv::MatND> &histograms, co
         cv::calcHist(&channels[i], 1, ch, mask, histograms[i], 1, b, r_ch, uniform , accumulate);
     }
 }
+
+inline int numClusters(const cv::Mat &src)
+{
+    assert(src.type() == CV_32SC1);
+    double min, max;
+    cv::minMaxLoc(src, &min, &max);
+    return max - min + 1;
+
+}
+
+template<typename _Tp>
+inline void histogram(const cv::Mat        &src,
+                      const cv::Mat        &mask,
+                      const cv::Mat        &clusters,
+                      const double          range_min,
+                      const double          range_max,
+                      const int             bins,
+                      const int             num_clusters,
+                      std::vector<cv::Mat> &histograms)
+{
+    assert(src.channels() == 1);
+    assert(clusters.rows == src.rows);
+    assert(clusters.cols == src.cols);
+    assert(clusters.type() == CV_32SC1);
+    assert(range_min < range_max);
+
+    histograms.resize(num_clusters, cv::Mat());
+    for(cv::Mat &m : histograms)
+        m = cv::Mat(bins, 1, CV_32SC1, cv::Scalar::all(0));
+
+    const int    size = src.rows * src.cols;
+    const double bin_size_inv = 1.0 / ((range_max - range_min) / (double) (bins - 1));
+    const _Tp   *src_ptr     = src.ptr<_Tp>();
+    const int   *cluster_ptr = clusters.ptr<int>();
+    cv::Mat     *hist_ptr = histograms.data();
+
+    if(mask.empty()) {
+        for(int i = 0 ; i < size ; ++i, ++src_ptr, ++cluster_ptr) {
+            const _Tp &val = *src_ptr;
+            if(val >= range_min && val <= range_max) {
+                int *bins_ptr = hist_ptr[*cluster_ptr].ptr<int>();
+                int bin = floor((val - range_min) * bin_size_inv);
+                assert(bin >= 0);
+                assert(bin <  bins);
+                assert(*cluster_ptr >= 0);
+                assert(*cluster_ptr < num_clusters);
+                ++(bins_ptr[bin]);
+            }
+        }
+    } else {
+        const uchar *mask_ptr    = mask.ptr<uchar>();
+        for(int i = 0 ; i < size ; ++i, ++src_ptr, ++cluster_ptr, ++mask_ptr) {
+            const _Tp &val = *src_ptr;
+            if(*mask_ptr > 0) {
+                if(val >= range_min && val <= range_max) {
+                    int *bins_ptr = hist_ptr[*cluster_ptr].ptr<int>();
+                    int bin = floor(val * bin_size_inv);
+                    ++(bins_ptr[bin]);
+                }
+            }
+        }
+    }
+}
+
+template<typename _Tp>
+inline void histogram(const cv::Mat        &src,
+                      const cv::Mat        &mask,
+                      const cv::Mat        &clusters,
+                      const _Tp             range_min,
+                      const _Tp             range_max,
+                      const int             bins,
+                      const int             num_clusters,
+                      cv::Mat              &histograms)
+{
+    assert(src.channels() == 1);
+    assert(mask.type() == CV_8UC1);
+    assert(clusters.type() == CV_32SC1);
+    assert(clusters.rows == src.rows);
+    assert(clusters.cols == src.cols);
+    assert(range_min < range_max);
+
+    histograms = cv::Mat(num_clusters, bins, CV_32SC1, cv::Scalar::all(0));
+
+    const int    size = src.rows * src.cols;
+    const double bin_size_inv = 1.0 / ((range_max - range_min) / (double) bins);
+    const _Tp   *src_ptr     = src.ptr<_Tp>();
+    const uchar *mask_ptr    = mask.ptr<uchar>();
+    const int   *cluster_ptr = clusters.ptr<int>();
+    int*         hist_ptr = histograms.ptr<int>();
+
+    if(mask.empty()) {
+        for(int i = 0 ; i < size ; ++i, ++src_ptr, ++cluster_ptr) {
+            const _Tp &val = *src_ptr;
+            if(val >= range_min && val <= range_max) {
+                int c = *cluster_ptr;
+                int pos = c * bins + floor(val * bin_size_inv);
+                ++(hist_ptr[pos]);
+            }
+        }
+    } else {
+        for(int i = 0 ; i < size ; ++i, ++src_ptr, ++cluster_ptr, ++mask_ptr) {
+            const _Tp &val = *src_ptr;
+            if(*mask_ptr > 0) {
+                if(val >= range_min && val <= range_max) {
+                    int c = *cluster_ptr;
+                    int pos = c * bins + floor(val * bin_size_inv);
+                    ++(hist_ptr[pos]);
+                }
+            }
+        }
+    }
+}
+
+
+
 
 /**
  * @brief Do a full channel histogram equalization of an image.
@@ -345,7 +461,7 @@ inline void render_curve(const cv::Mat &src, const std::vector<Maximum> &maxima,
         it != maxima.end() ;
         ++it) {
         cv::Point2f p(bin_width * it->first + offset,
-                     dst.rows - tmp.at<Tp>(it->first));
+                      dst.rows - tmp.at<Tp>(it->first));
         cv::circle(dst, p, radius, cv::Scalar(color[2], color[0], color[1]), line_width, CV_AA);
     }
 
