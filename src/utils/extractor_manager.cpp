@@ -7,7 +7,6 @@
 
 /// SYSTEM
 #include <algorithm>
-#include <boost/foreach.hpp>
 
 using namespace csapex;
 
