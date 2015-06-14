@@ -16,7 +16,16 @@ endif()
 find_package(catkin REQUIRED COMPONENTS cv_bridge utils_param cmake_modules)
 
 # note to ubuntu 14 users: if opencv is installed at /usr/local and is not found:    sudo ldconfig /usr/local/lib
-find_package(OpenCV REQUIRED)
+set(USED_OpenCV_COMPONENTS core highgui imgproc flann ml video)
+find_package(OpenCV COMPONENTS nonfree ${USED_OpenCV_COMPONENTS} QUIET CONFIG)
+
+if(${OpenCV_FOUND})
+    add_definitions("-DCV_NON_FREE=1")
+else()
+    add_definitions("-DCV_NON_FREE=0")
+    message("OpenCV nonfree was not found, SIFT and SURF will not be available. If you need them, compile OpenCV from source and remove CMakeCache.txt!")
+    find_package(OpenCV REQUIRED COMPONENTS ${USED_OpenCV_COMPONENTS} CONFIG)
+endif()
 
 find_package(Eigen3 REQUIRED)
 
@@ -33,20 +42,6 @@ include_directories(include
     ${catkin_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
 )
-
-set(NONFREE_FOUND false)
-foreach(dir ${OpenCV_INCLUDE_DIRS})
-    if(EXISTS "${dir}/opencv2/nonfree/")
-        set(NONFREE_FOUND true)
-    endif()
-endforeach()
-
-if(${NONFREE_FOUND})
-    add_definitions("-DCV_NON_FREE=1")
-else()
-    add_definitions("-DCV_NON_FREE=0")
-    message("OpenCV nonfree was not found, SIFT and SURF will not be available. If you need them, compile OpenCV from source and remove CMakeCache.txt!")
-endif()
 
 ##### COMMON
 set(GLOBALS
