@@ -1,6 +1,7 @@
 #ifndef WLD_HPP
 #define WLD_HPP
-#include "texture_descriptor.hpp"
+
+#include <opencv2/core/core.hpp>
 
 #define M_PI_8 0.39269908169872415481
 #define SHORTENED  31.0  / M_PI
@@ -11,7 +12,7 @@
 #define THRESHOLD_4 M_PI*7.0/8.0
 
 namespace utils_vision {
-class WLD : public TextureDescriptor
+class WLD
 {
 public:
     static inline void standard(const cv::Mat &src,

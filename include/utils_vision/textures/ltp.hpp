@@ -1,17 +1,15 @@
 #ifndef LTP_HPP
 #define LTP_HPP
 
-#include "texture_descriptor.hpp"
+#include <opencv2/core/core.hpp>
 
 namespace utils_vision {
 /**
  * @brief The LTP class is used to calculate local ternary
  *        patterns;
  */
-class LTP : public TextureDescriptor {
+class LTP {
 public:
-    typedef cv::Ptr<TextureDescriptor> Ptr;
-
     template <typename _Tp>
     static inline void histogram(const cv::Mat &src,
                                  const _Tp k,
