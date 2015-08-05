@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
     vector<Point3f> obj;
     for (int j=0; j<board_n; j++)
     {
-        obj.push_back(Point3f(j/board_w, j%board_w, 0.0f));
+        obj.push_back(Point3f(j/board_w * 0.1, j%board_w * 0.1, 0.0f));
     }
 
     Mat img1, img2, gray1, gray2;

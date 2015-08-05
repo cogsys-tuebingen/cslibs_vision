@@ -1,5 +1,5 @@
 #include <opencv2/opencv.hpp>
-
+#include <utils_vision/utils/color_functions.hpp>
 
 #define INPUT_ERROR std::cerr << "utils_vision_test_stereo <video_file> <stereo_parameters>" << std::endl
 
@@ -46,6 +46,38 @@ struct StereoParameters {
     }
 };
 
+inline void depthColor(const cv::Mat &src, cv::Mat &dst)
+{
+    assert(src.type() == CV_32FC3);
+
+    dst = cv::Mat(src.rows, src.cols, CV_8UC3, cv::Scalar());
+
+    cv::Vec3b *dst_ptr = dst.ptr<cv::Vec3b>();
+    const cv::Point3f *src_ptr = src.ptr<cv::Point3f>();
+
+    cv::Mat distances(src.rows, src.cols, CV_32FC1, cv::Scalar());
+    float *distances_ptr = distances.ptr<float>();
+
+    float max = std::numeric_limits<float>::min();
+    for(unsigned int i = 0 ; i < src.rows ; ++i) {
+        for(unsigned int j = 0 ; j < src.cols ; ++j) {
+            const cv::Point3f &pt = src_ptr[i * src.cols + j];
+            float dist = sqrt(pt.x * pt.x + pt.y * pt.y + pt.z * pt.z);
+            distances_ptr[i * src.cols + j] = dist;
+            if(dist > max && dist < std::numeric_limits<float>::infinity() && dist < 10000)
+                max = dist;
+        }
+    }
+
+    std::cout << max << std::endl;
+    for(unsigned int i = 0; i < src.rows ; ++i) {
+        for(unsigned int j = 0 ; j < src.cols ; ++j) {
+            dst_ptr[i * src.cols + j] = utils_vision::color::bezierColor<cv::Vec3b>(distances_ptr[i * src.cols + j] / max);
+        }
+    }
+}
+
+
 void runSBM(const std::string &path_video,
             const StereoParameters &p)
 {
@@ -69,6 +101,8 @@ void runSBM(const std::string &path_video,
     cv::Mat right;
     cv::Mat disparity;
     cv::Mat disparity_vis;
+    cv::Mat points_3D;
+    cv::Mat points_3D_vis;
     while(vid.grab()) {
         cv::Mat img;
         vid >> img;
@@ -80,16 +114,19 @@ void runSBM(const std::string &path_video,
         right = img.colRange(cvRound(img.cols / 2), img.cols);
 
         sbm(left, right, disparity, CV_32F);
-
+        cv::reprojectImageTo3D(disparity,points_3D,p.Q);
 
         double min, max;
         cv::minMaxLoc(disparity, &min, &max);
         cv::normalize(disparity, disparity, 0, 1, cv::NORM_MINMAX);
         disparity.convertTo( disparity_vis, CV_8UC1, 255.0 );
 
+        depthColor(points_3D, points_3D_vis);
+
         cv::imshow("video left", left);
         cv::imshow("video right", right);
         cv::imshow("disparity", disparity_vis);
+        cv::imshow("depth", points_3D_vis);
 
         int key = cv::waitKey(19) & 0xFF;
         if(key == 27)
@@ -122,6 +159,8 @@ void runSGBM(const std::string &path_video,
     cv::Mat right;
     cv::Mat disparity;
     cv::Mat disparity_vis;
+    cv::Mat points_3D;
+    cv::Mat points_3D_vis;
     while(vid.grab()) {
         cv::Mat img;
         vid >> img;
@@ -133,16 +172,19 @@ void runSGBM(const std::string &path_video,
         right = img.colRange(cvRound(img.cols / 2), img.cols);
 
         sgbm(left, right, disparity);
-
+        cv::reprojectImageTo3D(disparity,points_3D,p.Q);
 
         double min, max;
         cv::minMaxLoc(disparity, &min, &max);
         cv::normalize(disparity, disparity, 0, 1, cv::NORM_MINMAX);
         disparity.convertTo( disparity_vis, CV_8UC1, 255.0 );
 
+        depthColor(points_3D, points_3D_vis);
+
         cv::imshow("video left", left);
         cv::imshow("video right", right);
         cv::imshow("disparity", disparity_vis);
+        cv::imshow("depth", points_3D_vis);
 
         int key = cv::waitKey(19) & 0xFF;
         if(key == 27)
