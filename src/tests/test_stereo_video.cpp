@@ -1,50 +1,10 @@
 #include <opencv2/opencv.hpp>
 #include <utils_vision/utils/color_functions.hpp>
+#include <utils_vision/utils/stereo_parameters.hpp>
+
+using namespace utils_vision;
 
 #define INPUT_ERROR std::cerr << "utils_vision_test_stereo <video_file> <stereo_parameters>" << std::endl
-
-struct StereoParameters {
-    cv::Mat CM1, CM2;
-    cv::Mat D1, D2;
-    cv::Mat R, T, E, F;
-    cv::Mat R1, R2, P1, P2, Q;
-
-
-    void write(const std::string &calibration) {
-        cv::FileStorage fso(calibration, cv::FileStorage::WRITE);
-        fso << "CM1" << CM1;
-        fso << "CM2" << CM2;
-        fso << "D1"  << D1;
-        fso << "D2"  << D2;
-        fso << "R"   << R;
-        fso << "T"   << T;
-        fso << "E"   << E;
-        fso << "F"   << F;
-        fso << "R1"  << R1;
-        fso << "R2"  << R2;
-        fso << "P1"  << P1;
-        fso << "P2"  << P2;
-        fso << "Q"   << Q;
-        fso.release();
-    }
-    void read(const std::string &calibration) {
-        cv::FileStorage fsi(calibration, cv::FileStorage::READ);
-        fsi["CM1"] >> CM1;
-        fsi["CM2"] >> CM2;
-        fsi["D1"]  >> D1;
-        fsi["D2"]  >> D2;
-        fsi["R"]   >> R;
-        fsi["T"]   >> T;
-        fsi["E"]   >> E;
-        fsi["F"]   >> F;
-        fsi["R1"]  >> R1;
-        fsi["R2"]  >> R2;
-        fsi["P1"]  >> P1;
-        fsi["P2"]  >> P2;
-        fsi["Q"]   >> Q;
-        fsi.release();
-    }
-};
 
 inline void depthColor(const cv::Mat &src, cv::Mat &dst)
 {
@@ -63,13 +23,16 @@ inline void depthColor(const cv::Mat &src, cv::Mat &dst)
         for(unsigned int j = 0 ; j < src.cols ; ++j) {
             const cv::Point3f &pt = src_ptr[i * src.cols + j];
             float dist = sqrt(pt.x * pt.x + pt.y * pt.y + pt.z * pt.z);
+            if(dist == std::numeric_limits<float>::infinity()) {
+                dist = 0;
+            }
+
             distances_ptr[i * src.cols + j] = dist;
             if(dist > max && dist < std::numeric_limits<float>::infinity() && dist < 10000)
                 max = dist;
         }
     }
 
-    std::cout << max << std::endl;
     for(unsigned int i = 0; i < src.rows ; ++i) {
         for(unsigned int j = 0 ; j < src.cols ; ++j) {
             dst_ptr[i * src.cols + j] = utils_vision::color::bezierColor<cv::Vec3b>(distances_ptr[i * src.cols + j] / max);
