@@ -4,54 +4,50 @@
 #define INPUT_ERROR std::cerr << "utils_vision_test_stereo <video_file> <stereo_parameters>" << std::endl
 
 struct StereoParameters {
-    double   base_line;
-    double   focal_length;
-    double   cx;
-    double   xs;
-    double   cy;
-    double   ys;
-    cv::Mat  cam;
-    cv::Mat  kl;
-    cv::Mat  kr;
-    cv::Mat  Q;
+    cv::Mat CM1, CM2;
+    cv::Mat D1, D2;
+    cv::Mat R, T, E, F;
+    cv::Mat R1, R2, P1, P2, Q;
 
-    StereoParameters() {
-        base_line = 2.3997700199999999e-01;
-        focal_length = 9.6899969482400002e+02;
-        cy = 4.6353710937500000e+02;
-        cx = 6.3513903808600003e+02;
-        ys = 960;
-        xs = 1280;
+
+    void write(const std::string &calibration) {
+        cv::FileStorage fso(calibration, cv::FileStorage::WRITE);
+        fso << "CM1" << CM1;
+        fso << "CM2" << CM2;
+        fso << "D1"  << D1;
+        fso << "D2"  << D2;
+        fso << "R"   << R;
+        fso << "T"   << T;
+        fso << "E"   << E;
+        fso << "F"   << F;
+        fso << "R1"  << R1;
+        fso << "R2"  << R2;
+        fso << "P1"  << P1;
+        fso << "P2"  << P2;
+        fso << "Q"   << Q;
+        fso.release();
     }
-
-    void read(const std::string &path)
-    {
-        cv::FileStorage fs(path, cv::FileStorage::READ);
-        fs["base_line"]    >> base_line;
-        fs["focal_length"] >> focal_length;
-        fs["cy"]           >> cy;
-        fs["cx"]           >> cx;
-        fs["ys"]           >> ys;
-        fs["xs"]           >> xs;
-        fs.release();
-
+    void read(const std::string &calibration) {
+        cv::FileStorage fsi(calibration, cv::FileStorage::READ);
+        fsi["CM1"] >> CM1;
+        fsi["CM2"] >> CM2;
+        fsi["D1"]  >> D1;
+        fsi["D2"]  >> D2;
+        fsi["R"]   >> R;
+        fsi["T"]   >> T;
+        fsi["E"]   >> E;
+        fsi["F"]   >> F;
+        fsi["R1"]  >> R1;
+        fsi["R2"]  >> R2;
+        fsi["P1"]  >> P1;
+        fsi["P2"]  >> P2;
+        fsi["Q"]   >> Q;
+        fsi.release();
     }
-
-    void write(const std::string &path)
-    {
-        cv::FileStorage fs(path, cv::FileStorage::WRITE);
-        fs << "base_line"    << base_line;
-        fs << "focal_length" << focal_length;
-        fs << "cy"           << cy;
-        fs << "cx"           << cx;
-        fs << "ys"           << ys;
-        fs << "xs"           << xs;
-        fs.release();
-    }
-
 };
 
-void runSBM(const std::string &path_video)
+void runSBM(const std::string &path_video,
+            const StereoParameters &p)
 {
     cv::VideoCapture vid;
     vid.open(path_video);
@@ -103,7 +99,8 @@ void runSBM(const std::string &path_video)
     vid.release();
 }
 
-void runSGBM(const std::string &path_video)
+void runSGBM(const std::string &path_video,
+             const StereoParameters &p)
 {
     cv::VideoCapture vid;
     vid.open(path_video);
@@ -163,48 +160,13 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    bool calibrate = argc == 5;
-
     std::string path_video = argv[1];
     std::string path_calib = argv[2];
-
-
-
     StereoParameters p;
     p.read(path_calib);
-    if(calibrate) {
-        std::string path_right_calib_pts = argv[3];
-        std::string path_left_calib_pts = argv[4];
-        std::vector<cv::Point3f> obj_pts_right;
-        std::vector<cv::Point3f> obj_pts_left;
-        std::vector<cv::Point2f> img_pts_right;
-        std::vector<cv::Point2f> img_pts_left;
 
-        cv::FileStorage fsl(path_left_calib_pts, cv::FileStorage::READ);
-        fsl["obj"] >> obj_pts_left;
-        fsl["img"] >> img_pts_left;
-        fsl.release();
-        cv::FileStorage fsr(path_right_calib_pts, cv::FileStorage::READ);
-        fsr["obj"] >> obj_pts_right;
-        fsr["img"] >> img_pts_right;
-        fsr.release();
-
-        cv::Mat cam1, dist1;
-        cv::Mat cam2, dist2;
-        cv::Mat R, T, E, F;
-        cv::stereoCalibrate(obj_pts_left, img_pts_left, img_pts_right, cam1, dist1, cam2, dist2,
-                            cv::Size(p.xs, p.ys),R,T, E, F);
-
-        cv::Mat R1, P1, R2, P2;
-        cv::Mat Q;
-        cv::stereoRectify(cam1, dist1, cam2, dist2, cv::Size(p.xs, p.ys), R, T, R1, R2, P1, P2, Q);
-        p.Q = Q.clone();
-        std::cout << Q << std::endl;
-    }
-
-    runSBM(path_video);
-
-    runSGBM(path_video);
+    runSBM(path_video, p);
+    runSGBM(path_video, p);
 
     return 0;
 }
