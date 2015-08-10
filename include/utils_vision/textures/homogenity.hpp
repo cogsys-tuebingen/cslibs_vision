@@ -1,10 +1,10 @@
 #ifndef HOMOGENITY_HPP
 #define HOMOGENITY_HPP
 
-#include "texture_descriptor.hpp"
+#include <opencv2/core/core.hpp>
 
 namespace utils_vision {
-class Homogenity : public TextureDescriptor
+class Homogenity
 {
 public:
     static inline void standard(const cv::Mat &src,

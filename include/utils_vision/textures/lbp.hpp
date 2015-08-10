@@ -1,18 +1,16 @@
 #ifndef LBP_HPP
 #define LBP_HPP
 
-#include "texture_descriptor.hpp"
+#include <opencv2/core/core.hpp>
 
 namespace utils_vision {
 /**
  * @brief The LTP class is used to calculate local binary
  *        patterns;
  */
-class LBP : public TextureDescriptor
+class LBP
 {
 public:
-    typedef cv::Ptr<LBP> Ptr;
-
     template <typename _Tp>
     static inline void histogram(const cv::Mat &src,
                                  const double k,

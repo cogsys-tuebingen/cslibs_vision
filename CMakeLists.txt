@@ -16,7 +16,7 @@ endif()
 find_package(catkin REQUIRED COMPONENTS cv_bridge utils_param cmake_modules)
 
 # note to ubuntu 14 users: if opencv is installed at /usr/local and is not found:    sudo ldconfig /usr/local/lib
-set(USED_OpenCV_COMPONENTS core highgui imgproc flann ml video)
+set(USED_OpenCV_COMPONENTS core highgui imgproc flann ml video calib3d)
 find_package(OpenCV COMPONENTS nonfree ${USED_OpenCV_COMPONENTS} QUIET CONFIG)
 
 list(FIND OpenCV_LIB_COMPONENTS opencv_nonfree NONFREE_INDEX)
@@ -111,6 +111,29 @@ add_library(utils_vision
 target_link_libraries(utils_vision yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
 target_link_libraries(utils_vision logger)
 
+add_executable(utils_vision_test_stereo_video
+    src/tests/test_stereo_video.cpp
+)
+
+target_link_libraries(utils_vision_test_stereo_video
+    ${OpenCV_LIBS}
+)
+
+add_executable(utils_vision_test_stereo_image_seq
+    src/tests/test_stereo_image_seq.cpp
+)
+
+target_link_libraries(utils_vision_test_stereo_image_seq
+    ${OpenCV_LIBS}
+)
+
+add_executable(utils_vision_stereo_calib
+    src/tests/stereo_calib.cpp
+)
+
+target_link_libraries(utils_vision_stereo_calib
+    ${OpenCV_LIBS}
+)
 
 
 install(TARGETS utils_vision
