@@ -19,7 +19,10 @@ find_package(catkin REQUIRED COMPONENTS cv_bridge utils_param cmake_modules)
 set(USED_OpenCV_COMPONENTS core highgui imgproc flann ml video)
 find_package(OpenCV COMPONENTS nonfree ${USED_OpenCV_COMPONENTS} QUIET CONFIG)
 
-if(${OpenCV_FOUND})
+list(FIND OpenCV_LIB_COMPONENTS opencv_nonfree NONFREE_INDEX)
+set(NONFREE_FOUND NOT ${NONFREE_INDEX} EQUAL -1)
+
+if(${OpenCV_FOUND} AND ${NONFREE_FOUND})
     add_definitions("-DCV_NON_FREE=1")
 else()
     add_definitions("-DCV_NON_FREE=0")
