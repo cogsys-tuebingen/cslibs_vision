@@ -57,11 +57,6 @@ add_library(logger
 
 ##### CORE
 add_library(utils_vision
-    src/config/config.cpp
-    src/config/configurated_tools.cpp
-    src/config/reconfigurable.cpp
-    src/config/types.cpp
-
     src/data/angle.cpp
     src/data/directory_io.cpp
     src/data/frame.cpp
@@ -83,7 +78,6 @@ add_library(utils_vision
     src/utils/match_scorer_homography.cpp
     src/utils/match_scorer_clustering.cpp
     src/utils/match_scorer_reprojection.cpp
-    src/utils/match_scorer_factory.cpp
     src/utils/perspective_transform.cpp
     src/utils/preemptiveSLIC.cpp
     src/utils/randomforest.cpp

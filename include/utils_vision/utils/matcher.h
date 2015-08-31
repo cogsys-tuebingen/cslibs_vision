@@ -21,7 +21,7 @@ public:
     /**
      * @brief Matcher
      */
-    Matcher(bool binary);
+    Matcher(bool binary, int min_points, double threshold);
 
     /**
      * @brief match find pairs of matching keypoints in a and b

@@ -14,7 +14,7 @@ public:
      * @brief MatchScorerClustering
      * @param matcher
      */
-    MatchScorerClustering(Matcher& matcher);
+    MatchScorerClustering(Matcher& matcher, int octaves);
 
     /**
      * @brief calculateScore Tests two Matchables and returns the score
@@ -24,6 +24,9 @@ public:
      * @return the score of the two input objects
      */
     double calculateScore(Matchable& frame, Matchable& reference, int* no_of_features = 0) const;
+
+private:
+    int octaves;
 };
 
 #endif // MATCH_SCORER_CLUSTERING_H

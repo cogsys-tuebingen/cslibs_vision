@@ -6,25 +6,22 @@
 
 /// PROJECT
 #include <utils_vision/common/global.hpp>
-#include <utils_vision/config/config.h>
 #include <utils_vision/data/frame.h>
 #include <utils_vision/data/matchable.h>
 #include <utils_vision/data/matchable_pose.h>
 #include <utils_vision/utils/hough_peak.h>
 #include <utils_vision/utils/opencv_utils.hpp>
 
-MatchScorerClustering::MatchScorerClustering(Matcher& matcher)
-    : MatchScorer(matcher)
+MatchScorerClustering::MatchScorerClustering(Matcher& matcher, int octaves)
+    : MatchScorer(matcher), octaves(octaves)
 {
 }
 
 double MatchScorerClustering::calculateScore(Matchable& frame, Matchable& reference, int* no_of_features) const
 {
-    Config cfg = Config::instance();
-
     int k = 8;
     int scaling = 20;
-    HoughPeak<false,true> hough_imp(k, scaling, cfg("octaves")->as<int>(), reference, frame);
+    HoughPeak<false,true> hough_imp(k, scaling, octaves, reference, frame);
     HoughAlgorithm& hough = hough_imp;
     hough.min_count = 8;
 

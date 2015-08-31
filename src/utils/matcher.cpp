@@ -2,12 +2,11 @@
 #include <utils_vision/utils/matcher.h>
 
 /// PROJECT
-#include <utils_vision/config/config.h>
 #include <utils_vision/data/matchable.h>
 
 
-Matcher::Matcher(bool binary)
-    : hamming(binary), threshold(0.8)
+Matcher::Matcher(bool binary, int min_points, double threshold)
+    : hamming(binary), threshold(threshold), min_points(min_points)
 {
     if(binary) {
 #if CV_MAJOR_VERSION <= 2 && CV_MINOR_VERSION < 4
@@ -18,11 +17,6 @@ Matcher::Matcher(bool binary)
     } else {
         descriptor_matcher = new cv::FlannBasedMatcher();
     }
-
-    const Config config = Config::instance();
-
-    min_points = config("min_points")->as<int>();
-    threshold = config("matcher_threshold")->as<double>();
 }
 
 double Matcher::matchFiltered(Matchable* a, const Matchable* b,
