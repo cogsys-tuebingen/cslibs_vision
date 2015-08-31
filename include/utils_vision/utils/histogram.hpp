@@ -228,8 +228,10 @@ inline void histogram(const cv::Mat        &src,
     if(mask.empty()) {
         for(int i = 0 ; i < size ; ++i, ++src_ptr, ++cluster_ptr) {
             const _Tp &val = *src_ptr;
-            if(val >= range_min && val <= range_max) {
-                int *bins_ptr = hist_ptr[*cluster_ptr].ptr<int>();
+            const int cluster = *cluster_ptr;
+            if(val >= range_min && val <= range_max &&
+                    cluster > -1) {
+                int *bins_ptr = hist_ptr[cluster].ptr<int>();
                 int bin = floor((val - range_min) * bin_size_inv);
                 assert(bin >= 0);
                 assert(bin <  bins);
@@ -242,9 +244,11 @@ inline void histogram(const cv::Mat        &src,
         const uchar *mask_ptr    = mask.ptr<uchar>();
         for(int i = 0 ; i < size ; ++i, ++src_ptr, ++cluster_ptr, ++mask_ptr) {
             const _Tp &val = *src_ptr;
+            const int cluster = *cluster_ptr;
             if(*mask_ptr > 0) {
-                if(val >= range_min && val <= range_max) {
-                    int *bins_ptr = hist_ptr[*cluster_ptr].ptr<int>();
+                if(val >= range_min && val <= range_max &&
+                        cluster > -1) {
+                    int *bins_ptr = hist_ptr[cluster].ptr<int>();
                     int bin = floor(val * bin_size_inv);
                     ++(bins_ptr[bin]);
                 }
