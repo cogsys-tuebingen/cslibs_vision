@@ -11,10 +11,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>utils_param</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>cmake_modules</build_depend>
 
-  <run_depend>utils_param</run_depend>
   <run_depend>cv_bridge</run_depend>
 </package>

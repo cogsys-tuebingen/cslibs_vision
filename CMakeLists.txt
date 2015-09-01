@@ -13,7 +13,7 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-find_package(catkin REQUIRED COMPONENTS cv_bridge utils_param cmake_modules)
+find_package(catkin REQUIRED COMPONENTS cv_bridge cmake_modules)
 
 # note to ubuntu 14 users: if opencv is installed at /usr/local and is not found:    sudo ldconfig /usr/local/lib
 set(USED_OpenCV_COMPONENTS core highgui imgproc flann ml video calib3d)
@@ -37,7 +37,7 @@ find_package(Boost COMPONENTS program_options serialization REQUIRED)
 catkin_package(
     INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIR}
     LIBRARIES utils_vision logger
-    CATKIN_DEPENDS utils_param
+    CATKIN_DEPENDS
     DEPENDS Eigen3
 )
 
@@ -68,9 +68,6 @@ add_library(utils_vision
     src/data/pose.cpp
 
     src/utils/extractor.cpp
-    src/utils/extractors_default.cpp
-    src/utils/extractor_factory.cpp
-    src/utils/extractor_manager.cpp
     src/utils/flood.cpp
     src/utils/hough_peak.cpp
     src/utils/matcher.cpp

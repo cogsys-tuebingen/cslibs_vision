@@ -1,12 +1,13 @@
 #ifndef EXTRACTOR_H
 #define EXTRACTOR_H
 
-/// PROJECT
-#include <utils_param/parameter_provider.h>
-
 /// SYSTEM
 #include <boost/shared_ptr.hpp>
 #include <opencv2/opencv.hpp>
+
+namespace param {
+class ParameterProvider;
+}
 
 /**
  * @brief The Extractor class is responsible for extracting keypoints and their descriptors
