@@ -5,8 +5,10 @@
 #include <boost/shared_ptr.hpp>
 #include <opencv2/opencv.hpp>
 
+namespace csapex {
 namespace param {
 class ParameterProvider;
+}
 }
 
 /**
@@ -27,7 +29,7 @@ public:
     struct Initializer {
         typedef boost::shared_ptr<Initializer> Ptr;
 
-        virtual void init(Extractor*, const param::ParameterProvider&) = 0;
+        virtual void init(Extractor*, const csapex::param::ParameterProvider&) = 0;
     };
 
     /**
