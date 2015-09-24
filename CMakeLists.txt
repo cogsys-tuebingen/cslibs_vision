@@ -102,6 +102,7 @@ add_library(utils_vision
 target_link_libraries(utils_vision yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
 target_link_libraries(utils_vision logger)
 
+if(${NONFREE_FOUND})
 add_executable(utils_vision_test_stereo_video
     src/tests/test_stereo_video.cpp
 )
@@ -125,6 +126,7 @@ add_executable(utils_vision_stereo_calib
 target_link_libraries(utils_vision_stereo_calib
     ${OpenCV_LIBS}
 )
+endif()
 
 
 install(TARGETS utils_vision
