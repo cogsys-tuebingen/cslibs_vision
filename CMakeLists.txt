@@ -102,32 +102,6 @@ add_library(utils_vision
 target_link_libraries(utils_vision yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
 target_link_libraries(utils_vision logger)
 
-if(${NONFREE_FOUND})
-add_executable(utils_vision_test_stereo_video
-    src/tests/test_stereo_video.cpp
-)
-
-target_link_libraries(utils_vision_test_stereo_video
-    ${OpenCV_LIBS}
-)
-
-add_executable(utils_vision_test_stereo_image_seq
-    src/tests/test_stereo_image_seq.cpp
-)
-
-target_link_libraries(utils_vision_test_stereo_image_seq
-    ${OpenCV_LIBS}
-)
-
-add_executable(utils_vision_stereo_calib
-    src/tests/stereo_calib.cpp
-)
-
-target_link_libraries(utils_vision_stereo_calib
-    ${OpenCV_LIBS}
-)
-endif()
-
 
 install(TARGETS utils_vision
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
