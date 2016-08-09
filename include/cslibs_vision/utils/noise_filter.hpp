@@ -3,7 +3,7 @@
 
 #include <opencv2/core/core.hpp>
 
-namespace utils_vision {
+namespace cslibs_vision {
 
 template<typename T, typename S>
 struct ThresholdNoiseFilter {

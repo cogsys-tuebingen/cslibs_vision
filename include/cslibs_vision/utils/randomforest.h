@@ -3,7 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include <boost/shared_ptr.hpp>
 
-namespace utils_vision {
+namespace cslibs_vision {
 class RandomForest
 {
 public:

@@ -6,7 +6,7 @@
  */
 
 /// HEADER
-#include <utils_vision/utils/hough_peak.h>
+#include <cslibs_vision/utils/hough_peak.h>
 
 template <bool debug_enabled, bool use_theta>
 HoughPeak<debug_enabled, use_theta>::HoughPeak(int cluster_count, int scaling, int octaves, const Matchable& a, const Matchable& b)

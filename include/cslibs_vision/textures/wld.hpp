@@ -11,7 +11,7 @@
 #define THREHSOLD_3 M_PI*5.0/8.0
 #define THRESHOLD_4 M_PI*7.0/8.0
 
-namespace utils_vision {
+namespace cslibs_vision {
 class WLD
 {
 public:

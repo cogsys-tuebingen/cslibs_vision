@@ -1,7 +1,7 @@
-#include <utils_vision/utils/camera_calibration.h>
+#include <cslibs_vision/utils/camera_calibration.h>
 #include <stdexcept>
 
-using namespace utils_vision;
+using namespace cslibs_vision;
 
 CameraCalibration::CameraCalibration(const Mode mode, const cv::Size &board_size, const double square_size,
                                      const int kernel_size, const int flag_corner, const int flag_calib) :

@@ -3,7 +3,7 @@
 
 #include <opencv2/core/core.hpp>
 
-namespace utils_vision {
+namespace cslibs_vision {
 namespace color {
 static const cv::Point3f red(0.f,0.f,255.f);  /// P0
 static const cv::Point3f green(0.f,255.f,0.f);  /// P1

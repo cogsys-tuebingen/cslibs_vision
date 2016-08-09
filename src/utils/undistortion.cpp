@@ -1,7 +1,7 @@
-#include <utils_vision/utils/undistortion.h>
+#include <cslibs_vision/utils/undistortion.h>
 #include <opencv2/opencv.hpp>
 
-using namespace utils_vision;
+using namespace cslibs_vision;
 
 Undistortion::Undistortion(const cv::Mat &camera_mat, const cv::Mat &distoration_coeffs, const int interpolation) :
     interpolation_method_(interpolation),

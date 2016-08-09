@@ -4,7 +4,7 @@
 #include <opencv2/core/core.hpp>
 #include <boost/function.hpp>
 
-namespace utils_vision {
+namespace cslibs_vision {
 namespace heatmap {
 
     typedef boost::function<cv::Vec3f (float)> colorFunction;

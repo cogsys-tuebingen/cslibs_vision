@@ -37,9 +37,9 @@
 #include <cfloat>
 #include <cmath>
 #include <iostream>
-#include <utils_vision/utils/preemptiveSLIC.h>
+#include <cslibs_vision/utils/preemptiveSLIC.h>
 
-using namespace utils_vision;
+using namespace cslibs_vision;
 using namespace std;
 using namespace cv;
 

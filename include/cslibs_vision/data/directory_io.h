@@ -2,8 +2,8 @@
 #define DIRECTORY_IO_H
 
 /// PROJECT
-#include <utils_vision/common/global.hpp>
-#include <utils_vision/data/frame.h>
+#include <cslibs_vision/common/global.hpp>
+#include <cslibs_vision/data/frame.h>
 
 /// SYSTEM
 #include <boost/function.hpp>

@@ -1,6 +1,6 @@
-#include <utils_vision/utils/randomforest.h>
+#include <cslibs_vision/utils/randomforest.h>
 
-using namespace utils_vision;
+using namespace cslibs_vision;
 
 RandomForest::RandomForest() :
     forest_(new cv::RandomTrees()),

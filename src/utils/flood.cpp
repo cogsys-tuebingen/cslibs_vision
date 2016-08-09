@@ -1,8 +1,8 @@
-#include <utils_vision/utils/flood.h>
+#include <cslibs_vision/utils/flood.h>
 
 #include <deque>
 #include <opencv2/imgproc/imgproc.hpp>
-namespace utils_vision {
+namespace cslibs_vision {
 void flood(const cv::Mat &edges, const cv::Point &anchor,
            const unsigned short label,
            cv::Mat &labels, const uchar edge)
@@ -104,7 +104,7 @@ void label(const cv::Mat &edges, cv::Mat &labels, const uchar edge)
 {
     assert(edges.type() == CV_8UC1);
     unsigned short label  = FLOOD_LABEL_START;
-    labels = utils_vision::labels(edges);
+    labels = cslibs_vision::labels(edges);
 
     const uchar*  ptr_edge = edges.ptr<uchar>();
     ushort* ptr_lab  = labels.ptr<ushort>();
@@ -113,7 +113,7 @@ void label(const cv::Mat &edges, cv::Mat &labels, const uchar edge)
             if(*ptr_edge != edge &&
                     *ptr_lab  == FLOOD_LABEL_DEFAULT) {
                 cv::Point anchor(x,y);
-                utils_vision::flood(edges, anchor, label, labels, edge);
+                cslibs_vision::flood(edges, anchor, label, labels, edge);
                 ++label;
             }
             ++ptr_edge;
@@ -126,7 +126,7 @@ void label(const cv::Mat &edges, cv::Mat &labels, const uchar edge, const unsign
 {
     assert(edges.type() == CV_8UC1);
     unsigned short label  = FLOOD_LABEL_START;
-    labels = utils_vision::labels(edges);
+    labels = cslibs_vision::labels(edges);
 
     const uchar*  ptr_edge = edges.ptr<uchar>();
     ushort* ptr_lab  = labels.ptr<ushort>();
@@ -135,7 +135,7 @@ void label(const cv::Mat &edges, cv::Mat &labels, const uchar edge, const unsign
             if(*ptr_edge != edge &&
                     *ptr_lab  == FLOOD_LABEL_DEFAULT) {
                 cv::Point anchor(x,y);
-                utils_vision::flood(edges, anchor, label, labels, edge, threshold);
+                cslibs_vision::flood(edges, anchor, label, labels, edge, threshold);
                 ++label;
             }
             ++ptr_edge;

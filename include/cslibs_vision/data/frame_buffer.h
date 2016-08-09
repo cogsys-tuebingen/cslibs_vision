@@ -2,7 +2,7 @@
 #define FRAME_BUFFER_H
 
 /// PROJECT
-#include <utils_vision/common/global.hpp>
+#include <cslibs_vision/common/global.hpp>
 
 /// SYSTEM
 #include <boost/thread.hpp>

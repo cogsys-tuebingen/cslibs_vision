@@ -3,7 +3,7 @@
 
 #include <opencv2/core/core.hpp>
 
-namespace utils_vision {
+namespace cslibs_vision {
 struct StereoParameters {
     /// the camera projection matrices
     cv::Mat CM1, CM2;

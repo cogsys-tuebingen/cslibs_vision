@@ -3,7 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 
-namespace utils_vision {
+namespace cslibs_vision {
 template<typename LabelT>
 void getClusterBoundaryMask(const cv::Mat& src,
                             cv::Mat& dst)

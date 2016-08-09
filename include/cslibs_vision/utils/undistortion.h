@@ -4,7 +4,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <boost/shared_ptr.hpp>
 
-namespace utils_vision {
+namespace cslibs_vision {
 /**
  * @brief The Undistorter class encapsules the functionality for undistortion of images.
  */

@@ -1,19 +1,19 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(utils_vision)
+project(cslibs_vision)
 
 ## Enforce that we use C++11
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    add_definitions(-std=c++11)
 elseif(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    add_definitions(-std=c++0x)
 else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-find_package(catkin REQUIRED COMPONENTS cv_bridge cmake_modules)
+find_package(catkin REQUIRED COMPONENTS cv_bridge)
 
 # note to ubuntu 14 users: if opencv is installed at /usr/local and is not found:    sudo ldconfig /usr/local/lib
 set(USED_OpenCV_COMPONENTS core highgui imgproc flann ml video calib3d)
@@ -36,7 +36,7 @@ find_package(Boost COMPONENTS program_options serialization REQUIRED)
 
 catkin_package(
     INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIR}
-    LIBRARIES utils_vision logger
+    LIBRARIES cslibs_vision logger
     CATKIN_DEPENDS
     DEPENDS Eigen3
 )
@@ -48,15 +48,15 @@ include_directories(include
 
 ##### COMMON
 set(GLOBALS
-    include/utils_vision/common/global.hpp)
+    include/cslibs_vision/common/global.hpp)
 
 ##### LOGGER
 add_library(logger
-    include/utils_vision/common/global.hpp
+    include/cslibs_vision/common/global.hpp
     src/common/logger.cpp)
 
 ##### CORE
-add_library(utils_vision
+add_library(cslibs_vision
     src/data/angle.cpp
     src/data/directory_io.cpp
     src/data/frame.cpp
@@ -80,30 +80,30 @@ add_library(utils_vision
     src/utils/randomforest.cpp
     src/utils/undistortion.cpp
 
-    #include/utils_vision/utils/cluster_boundaries.hpp
-    #include/utils_vision/utils/color_functions.hpp
-    #include/utils_vision/utils/heatmap.hpp
-    #include/utils_vision/utils/histogram.hpp
-    #include/utils_vision/utils/kernel.hpp
-    #include/utils_vision/utils/log_odds.hpp
-    #include/utils_vision/utils/noise_filter.hpp
-    #include/utils_vision/utils/opencv_utils.hpp
-    #include/utils_vision/textures/texture_descriptor.hpp
-    #include/utils_vision/textures/lbp.hpp
-    #include/utils_vision/textures/ltp.hpp
-    #include/utils_vision/textures/wld.hpp
-    #include/utils_vision/textures/homogenity.hpp
+    #include/cslibs_vision/utils/cluster_boundaries.hpp
+    #include/cslibs_vision/utils/color_functions.hpp
+    #include/cslibs_vision/utils/heatmap.hpp
+    #include/cslibs_vision/utils/histogram.hpp
+    #include/cslibs_vision/utils/kernel.hpp
+    #include/cslibs_vision/utils/log_odds.hpp
+    #include/cslibs_vision/utils/noise_filter.hpp
+    #include/cslibs_vision/utils/opencv_utils.hpp
+    #include/cslibs_vision/textures/texture_descriptor.hpp
+    #include/cslibs_vision/textures/lbp.hpp
+    #include/cslibs_vision/textures/ltp.hpp
+    #include/cslibs_vision/textures/wld.hpp
+    #include/cslibs_vision/textures/homogenity.hpp
 
     src/utils/grusig_descriptor.cpp
     src/utils/rectangle_cluster.cpp
     src/utils/camera_calibration.cpp
     ${QT_UTIL}
     ${GLOBALS})
-target_link_libraries(utils_vision yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
-target_link_libraries(utils_vision logger)
+target_link_libraries(cslibs_vision yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
+target_link_libraries(cslibs_vision logger)
 
 
-install(TARGETS utils_vision
+install(TARGETS cslibs_vision
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
@@ -113,6 +113,6 @@ install(TARGETS logger
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
-install(DIRECTORY include/utils_vision
+install(DIRECTORY include/cslibs_vision
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 

@@ -45,7 +45,7 @@
 #include <algorithm>
 #include "opencv2/opencv.hpp"
 
-namespace utils_vision {
+namespace cslibs_vision {
 
 /**
 

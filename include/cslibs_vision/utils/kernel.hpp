@@ -2,7 +2,7 @@
 #define KERNEL_HPP
 #include <opencv2/core/core.hpp>
 
-namespace utils_vision {
+namespace cslibs_vision {
 template<typename number_t>
 void binomialCoefficients(std::vector<number_t>& row)
 {

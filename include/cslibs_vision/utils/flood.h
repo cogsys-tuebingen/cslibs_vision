@@ -1,7 +1,7 @@
 #ifndef FLOOD_H
 #define FLOOD_H
 #include <opencv2/core/core.hpp>
-namespace utils_vision {
+namespace cslibs_vision {
 
 const unsigned short FLOOD_LABEL_DEFAULT = 0;
 const unsigned short FLOOD_LABEL_START   = 1;

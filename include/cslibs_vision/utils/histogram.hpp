@@ -8,7 +8,7 @@
  * @namespace cv_histogram is a namespace containing functions that make calculating histograms easier.
  * @author Hanten, Richard
  */
-namespace utils_vision {
+namespace cslibs_vision {
 namespace histogram {
 const cv::Scalar COLOR_BLUE    = cv::Scalar(255, 0, 0);
 const cv::Scalar COLOR_GREEN   = cv::Scalar(0, 255, 0);

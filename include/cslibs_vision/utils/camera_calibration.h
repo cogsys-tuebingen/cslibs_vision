@@ -5,7 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <opencv2/opencv.hpp>
 
-namespace utils_vision {
+namespace cslibs_vision {
 class CameraCalibration {
 public:
     typedef boost::shared_ptr<CameraCalibration> Ptr;

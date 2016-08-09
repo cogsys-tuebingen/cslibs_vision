@@ -2,7 +2,7 @@
 #define CV_PERSPECTIVE_TRANSFORM_H
 #include <opencv2/core/core.hpp>
 
-namespace utils_vision {
+namespace cslibs_vision {
 /**
  * @brief The PerspectiveTransform class calculates a perspective transformation
  *        given different parameters, such as 3 angles, focal length and distance.

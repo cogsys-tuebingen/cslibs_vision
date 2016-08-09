@@ -1,8 +1,8 @@
 /// HEADER
-#include <utils_vision/data/painter.h>
+#include <cslibs_vision/data/painter.h>
 
 /// COMPONENT
-#include <utils_vision/data/frame.h>
+#include <cslibs_vision/data/frame.h>
 
 Painter::Painter(Matchable* target)
     : frame(dynamic_cast<Frame*>(target))

@@ -4,7 +4,7 @@
 /// SYSTEM
 #include <cmath>
 
-namespace utils_vision {
+namespace cslibs_vision {
 template<typename Tp>
 struct Odds {
     inline static Tp toProb(const Tp odds)
