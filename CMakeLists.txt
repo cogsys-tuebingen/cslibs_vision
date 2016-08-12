@@ -102,6 +102,50 @@ add_library(cslibs_vision
 target_link_libraries(cslibs_vision yaml-cpp ${Boost_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES})
 target_link_libraries(cslibs_vision logger)
 
+add_custom_target(show_cslibs_vision_header_in_qt SOURCES
+    include/cslibs_vision/data/angle.h
+    include/cslibs_vision/data/directory_io.h
+    include/cslibs_vision/data/frame_buffer.h
+    include/cslibs_vision/data/frame.h
+    include/cslibs_vision/data/frame_io.h
+    include/cslibs_vision/data/matchable.h
+    include/cslibs_vision/data/matchable_pose.h
+    include/cslibs_vision/data/painter.h
+    include/cslibs_vision/data/pose.h
+    include/cslibs_vision/data/robot.h
+
+    include/cslibs_vision/textures/homogenity.hpp
+    include/cslibs_vision/textures/lbp.hpp
+    include/cslibs_vision/textures/ltp.hpp
+    include/cslibs_vision/textures/wld.hpp
+
+    include/cslibs_vision/utils/camera_calibration.h
+    include/cslibs_vision/utils/cluster_boundaries.hpp
+    include/cslibs_vision/utils/color_functions.hpp
+    include/cslibs_vision/utils/extractor.h
+    include/cslibs_vision/utils/flood.h
+    include/cslibs_vision/utils/grusig_descriptor.h
+    include/cslibs_vision/utils/heatmap.hpp
+    include/cslibs_vision/utils/histogram.hpp
+    include/cslibs_vision/utils/hough_peak.h
+    include/cslibs_vision/utils/kernel.hpp
+    include/cslibs_vision/utils/lbp.h
+    include/cslibs_vision/utils/log_odds.hpp
+    include/cslibs_vision/utils/matcher.h
+    include/cslibs_vision/utils/match_scorer_clustering.h
+    include/cslibs_vision/utils/match_scorer.h
+    include/cslibs_vision/utils/match_scorer_homography.h
+    include/cslibs_vision/utils/match_scorer_reprojection.h
+    include/cslibs_vision/utils/noise_filter.hpp
+    include/cslibs_vision/utils/opencv_utils.hpp
+    include/cslibs_vision/utils/perspective_transform.h
+    include/cslibs_vision/utils/preemptiveSLIC.h
+    include/cslibs_vision/utils/randomforest.h
+    include/cslibs_vision/utils/rectangle_cluster.h
+    include/cslibs_vision/utils/stereo_parameters.hpp
+    include/cslibs_vision/utils/undistortion.h
+)
+
 
 install(TARGETS cslibs_vision
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
