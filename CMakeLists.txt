@@ -118,6 +118,7 @@ add_custom_target(show_cslibs_vision_header_in_qt SOURCES
     include/cslibs_vision/textures/lbp.hpp
     include/cslibs_vision/textures/ltp.hpp
     include/cslibs_vision/textures/wld.hpp
+    include/cslibs_vision/textures/hog.hpp
 
     include/cslibs_vision/utils/camera_calibration.h
     include/cslibs_vision/utils/cluster_boundaries.hpp
