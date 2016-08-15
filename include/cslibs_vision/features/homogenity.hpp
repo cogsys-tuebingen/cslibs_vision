@@ -9,6 +9,15 @@ class Homogenity
 public:
     Homogenity() = delete;
 
+    static inline int standardRows(const int src_rows)
+    {
+        return src_rows - 2;
+    }
+    static inline int standardCols(const int src_cols)
+    {
+        return src_cols - 2;
+    }
+
     static inline void standard(const cv::Mat &src,
                                 cv::Mat &dst)
     {
@@ -22,6 +31,15 @@ public:
         case CV_64FC1:_standard<double>(src, dst); break;
         default: throw std::runtime_error("Unsupported matrix type!");
         }
+    }
+
+    static inline int textureRows(const int src_rows)
+    {
+        return src_rows;
+    }
+    static inline int textureCols(const int src_cols)
+    {
+        return src_cols;
     }
 
     static inline void texture(const cv::Mat &src,
@@ -44,9 +62,9 @@ private:
     static inline void _standard(const cv::Mat &src,
                                  cv::Mat &dst)
     {
-        dst = cv::Mat_<uchar>(src.rows-2, src.cols-2, (uchar) 0);
-        cv::Mat var = cv::Mat_<float>(src.rows-2, src.cols-2, 0.f);
-        cv::Mat gre = cv::Mat_<float>(src.rows-2, src.cols-2, 0.f);
+        dst = cv::Mat(src.rows-2, src.cols-2, CV_8UC1, cv::Scalar());
+        cv::Mat var = cv::Mat(src.rows-2, src.cols-2, CV_32FC1, cv::Scalar());
+        cv::Mat gre = cv::Mat(src.rows-2, src.cols-2, CV_32FC1, cv::Scalar());
 
         const _Tp *src_ptr = src.ptr<_Tp>();
         uchar *dst_ptr = dst.ptr<uchar>();

@@ -2,6 +2,7 @@
 #define HOG_HPP
 
 #include <opencv2/opencv.hpp>
+#include "magnitude.hpp"
 
 namespace cslibs_vision {
 class HOG {
@@ -10,6 +11,11 @@ public:
 
     /// -UNDIRECTED------------------------------------------------------------------------------------------ ///
     /// ----------------------------------------------------------------------------------------------------- ///
+    static inline int  standarBins(const double bin_size)
+    {
+        return M_PI / bin_size;
+    }
+
     static inline void standard(const cv::Mat &src,
                                 const double   bin_size,
                                 cv::Mat       &dst_bins,
@@ -18,12 +24,8 @@ public:
         if(src.channels() > 1)
             throw std::runtime_error("Input matrix needs to be single channel!");
 
-        cv::Mat dx;
-        cv::Mat dy;
-        cv::Mat magnitude;
-        cv::Sobel(src, dx, CV_32F, 1, 0);
-        cv::Sobel(src, dy, CV_32F, 0, 1);
-        cv::magnitude(dx, dy, magnitude);
+        Magnitude::compute(src, magnitude);
+
         dst_bins = cv::Mat(magnitude.rows, magnitude.cols, CV_8UC1, cv::Scalar());
         dst_weights = cv::Mat(magnitude.rows, magnitude.cols, CV_32FC1, cv::Scalar());
 
@@ -64,11 +66,8 @@ public:
         if(src.channels() > 1)
             throw std::runtime_error("Input matrix needs to be single channel!");
 
-        cv::Mat dx;
-        cv::Mat dy;
-        cv::Sobel(src, dx, CV_32F, 1, 0);
-        cv::Sobel(src, dy, CV_32F, 0, 1);
-        cv::magnitude(dx, dy, magnitude);
+        Magnitude::compute(src, magnitude);
+
         dst.resize(bins, cv::Mat(magnitude.rows, magnitude.cols, CV_32FC1, cv::Scalar()));
         max_magnitude = std::numeric_limits<double>::lowest();
 
@@ -99,6 +98,11 @@ public:
 
     /// -DIRECTED-------------------------------------------------------------------------------------------- ///
     /// ----------------------------------------------------------------------------------------------------- ///
+    static inline int directedBins(const double bin_size)
+    {
+        return 2 * M_PI / bin_size;
+    }
+
     static inline void directed(const cv::Mat &src,
                                 const double   bin_size,
                                 cv::Mat       &dst_bins,
@@ -108,12 +112,9 @@ public:
             throw std::runtime_error("Input matrix needs to be single channel!");
 
 
-        cv::Mat dx;
-        cv::Mat dy;
         cv::Mat magnitude;
-        cv::Sobel(src, dx, CV_32F, 1, 0);
-        cv::Sobel(src, dy, CV_32F, 0, 1);
-        cv::magnitude(dx, dy, magnitude);
+        Magnitude::compute(src, magnitude);
+
         dst_bins = cv::Mat(magnitude.rows, magnitude.cols, CV_8UC1, cv::Scalar());
         dst_weights = cv::Mat(magnitude.rows, magnitude.cols, CV_32FC1, cv::Scalar());
 
@@ -152,11 +153,7 @@ public:
         if(src.channels() > 1)
             throw std::runtime_error("Input matrix needs to be single channel!");
 
-        cv::Mat dx;
-        cv::Mat dy;
-        cv::Sobel(src, dx, CV_32F, 1, 0);
-        cv::Sobel(src, dy, CV_32F, 0, 1);
-        cv::magnitude(dx, dy, magnitude);
+        Magnitude::compute(src, magnitude);
         dst.resize(channels, cv::Mat(magnitude.rows, magnitude.cols, CV_32FC1, cv::Scalar()));
 
         const std::size_t bins = 2 * M_PI / bin_size;

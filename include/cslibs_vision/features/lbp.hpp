@@ -18,7 +18,7 @@ public:
                                  const double k,
                                  cv::Mat &dst)
     {
-        dst = cv::Mat_<int>(1, 256, 0);
+        dst = cv::Mat(1, 256, CV_32SC1, cv::Scalar());
         // calculate patterns
         for(int i=1;i<src.rows-1;++i) {
             for(int j=1;j<src.cols-1;++j) {
@@ -49,6 +49,15 @@ public:
         tmp.copyTo(dst);
     }
 
+    static inline int standardRows(const int src_rows)
+    {
+        return src_rows - 2;
+    }
+    static inline int standardCols(const int src_cols)
+    {
+        return src_cols - 2;
+    }
+
     static inline void standard(const cv::Mat &src,
                                 const double k,
                                 cv::Mat &dst)
@@ -63,6 +72,17 @@ public:
         case CV_64FC1:_standard<double>(src, k, dst); break;
         default: throw std::runtime_error("Unsupported matrix type!");
         }
+    }
+
+    static inline int extendedRows(const int src_rows,
+                                   const int radius)
+    {
+        return src_rows - 2 * radius;
+    }
+    static inline int extendedCols(const int src_cols,
+                                   const int radius)
+    {
+        return src_cols - 2 * radius;
     }
 
     static inline void extended(const cv::Mat &src,
@@ -84,6 +104,17 @@ public:
         }
     }
 
+    static inline int varRows(const int src_rows,
+                              const int radius)
+    {
+        return src_rows - 2 * radius;
+    }
+    static inline int varCols(const int src_cols,
+                              const int radius)
+    {
+        return src_cols - 2 * radius;
+    }
+
     static inline void var(const cv::Mat &src,
                            const int radius,
                            const int neighbours,
@@ -101,6 +132,15 @@ public:
         }
     }
 
+
+    static inline int centerSymmetricRows(const int src_rows)
+    {
+        return src_rows - 2;
+    }
+    static inline int centerSymmetricCols(const int src_cols)
+    {
+        return src_cols - 2;
+    }
 
     static inline void centerSymmetric(const cv::Mat &src,
                                        const double k,
@@ -124,7 +164,7 @@ private:
                                  const double k,
                                  cv::Mat& dst)
     {
-        dst = cv::Mat_<uchar>(src.rows-2, src.cols-2, (uchar) 0);
+        dst = cv::Mat(src.rows-2, src.cols-2, CV_8UC1, cv::Scalar());
         const _Tp *src_ptr = src.ptr<_Tp>();
         uchar     *dst_ptr = dst.ptr<uchar>();
 
@@ -166,7 +206,7 @@ private:
                                  const double k,
                                  cv::Mat& dst) {
         int n = std::max(std::min(neighbours,31),1); // set bounds...
-        dst   = cv::Mat_<int>(src.rows-2*radius, src.cols-2*radius, (int) 0);
+        dst   = cv::Mat(src.rows-2*radius, src.cols-2*radius, CV_32SC1, cv::Scalar());
 
         const _Tp *src_ptr = src.ptr<_Tp>();
         int       *dst_ptr = dst.ptr<int>();
@@ -224,10 +264,10 @@ private:
 
         int dst_rows = src.rows - 2*radius;
         int dst_cols = src.cols - 2*radius;
-        dst    = cv::Mat_<float>(dst_rows, dst_cols, 0.f);
-        cv::Mat _mean  = cv::Mat_<float>(src.rows, src.cols, 0.f);
-        cv::Mat _delta = cv::Mat_<float>(src.rows, src.cols, 0.f);
-        cv::Mat _m2    = cv::Mat_<float>(src.rows, src.cols, 0.f);
+        dst    = cv::Mat(dst_rows, dst_cols, CV_32FC1, cv::Scalar());
+        cv::Mat _mean  = cv::Mat(src.rows, src.cols, CV_32FC1, cv::Scalar());
+        cv::Mat _delta = cv::Mat(src.rows, src.cols, CV_32FC1, cv::Scalar());
+        cv::Mat _m2    = cv::Mat(src.rows, src.cols, CV_32FC1, cv::Scalar());
 
         const _Tp *src_ptr = src.ptr<_Tp>();
         float *_mean_ptr  = _mean.ptr<float>();
@@ -292,7 +332,7 @@ private:
                                         const double k,
                                         cv::Mat& dst)
     {
-        dst = cv::Mat_<uchar>(src.rows-2, src.cols-2, (uchar) 0);
+        dst = cv::Mat(src.rows-2, src.cols-2, CV_8UC1, cv::Scalar());
 
         const _Tp *src_ptr = src.ptr<_Tp>();
         uchar     *dst_ptr = dst.ptr<uchar>();

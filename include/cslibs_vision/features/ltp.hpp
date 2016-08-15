@@ -16,7 +16,7 @@ public:
     static inline void histogram(const cv::Mat &src,
                                  const _Tp k,
                                  cv::Mat &dst) {
-        dst = cv::Mat_<int>(1, 512, 0);
+        dst = cv::Mat(1, 512, CV_32SC1, cv::Scalar());
         cv::Mat pos = dst.colRange(0, 256);
         cv::Mat neg = dst.colRange(256, 512);
 
@@ -61,6 +61,15 @@ public:
         tmp.copyTo(dst);
     }
 
+    static inline int standardRows(const int src_rows)
+    {
+        return src_rows - 2;
+    }
+    static inline int standardCols(const int src_cols)
+    {
+        return src_cols - 2;
+    }
+
     static inline void standard(const cv::Mat &src,
                                 const double k,
                                 cv::Mat &dst)
@@ -77,6 +86,14 @@ public:
         }
     }
 
+    static inline int centerSymmetricRows(const int src_rows)
+    {
+        return src_rows - 2;
+    }
+    static inline int centerSymmetricCols(const int src_cols)
+    {
+        return src_cols - 2;
+    }
 
     static inline void centerSymmetric(const cv::Mat &src,
                                        const double k,
@@ -94,6 +111,14 @@ public:
         }
     }
 
+    static inline int shortenedRows(const int src_rows)
+    {
+        return src_rows - 2;
+    }
+    static inline int shortenedCols(const int src_cols)
+    {
+        return src_cols - 2;
+    }
 
     static inline void shortened(const cv::Mat &src,
                                  const double k,
@@ -109,6 +134,17 @@ public:
         case CV_64FC1:_shortened<double>(src, k, dst); break;
         default: throw std::runtime_error("Unsupported matrix type!");
         }
+    }
+
+    static inline int extendedRows(const int src_rows,
+                                   const int radius)
+    {
+        return src_rows - 2 * radius;
+    }
+    static inline int extendedCols(const int src_cols,
+                                   const int radius)
+    {
+        return src_cols - 2 * radius;
     }
 
     static inline void extended(const cv::Mat &src,
@@ -135,7 +171,7 @@ private:
                                  const double k,
                                  cv::Mat& dst)
     {
-        dst = cv::Mat_<cv::Vec2b>(src.rows-2, src.cols-2, cv::Vec2b());
+        dst = cv::Mat(src.rows-2, src.cols-2, CV_8UC2, cv::Scalar());
 
         const _Tp *src_ptr = src.ptr<_Tp>();
         cv::Vec2b *dst_ptr = dst.ptr<cv::Vec2b>();
@@ -191,7 +227,7 @@ private:
                                         const double k,
                                         cv::Mat& dst)
     {
-        dst = cv::Mat_<cv::Vec2b>(src.rows-2, src.cols-2, cv::Vec2b());
+        dst = cv::Mat(src.rows-2, src.cols-2, CV_8UC2, cv::Scalar());
 
         const _Tp *src_ptr = src.ptr<_Tp>();
         cv::Vec2b *dst_ptr = dst.ptr<cv::Vec2b>();
@@ -245,7 +281,7 @@ private:
                                                 {6,14,22},
                                                 {7,15,23}};
 
-        dst = cv::Mat_<uchar>(src.rows-2, src.cols-2, (uchar) 0);
+        dst = cv::Mat(src.rows-2, src.cols-2, CV_8UC1, cv::Scalar());
 
         const _Tp *src_ptr = src.ptr<_Tp>();
         uchar *dst_ptr = dst.ptr<uchar>();
@@ -343,7 +379,7 @@ private:
                                  const double k,
                                  cv::Mat& dst) {
         int n = std::max(std::min(neighbours,31),1); // set bounds...
-        dst = cv::Mat_<cv::Vec2i>(src.rows-2*radius, src.cols-2*radius, cv::Vec2i());
+        dst = cv::Mat(src.rows-2*radius, src.cols-2*radius, CV_32SC2, cv::Scalar());
 
         const _Tp *src_ptr = src.ptr<_Tp>();
         cv::Vec2i *dst_ptr = dst.ptr<cv::Vec2i>();

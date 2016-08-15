@@ -17,6 +17,15 @@ class WLD
 public:
     WLD() = delete;
 
+    static inline int standardRows(const int src_rows)
+    {
+        return src_rows - 2;
+    }
+    static inline int standardCols(const int src_cols)
+    {
+        return src_cols - 2;
+    }
+
     static inline void standard(const cv::Mat &src,
                                 cv::Mat &dst)
     {
@@ -32,6 +41,14 @@ public:
         }
     }
 
+    static inline int shortenedRows(const int src_rows)
+    {
+        return src_rows - 2;
+    }
+    static inline int shortenedCols(const int src_cols)
+    {
+        return src_cols - 2;
+    }
     static inline void shortened(const cv::Mat &src,
                                  cv::Mat &dst)
     {
@@ -45,6 +62,15 @@ public:
         case CV_64FC1:_shortened<double>(src, dst); break;
         default: throw std::runtime_error("Unsupported matrix type!");
         }
+    }
+
+    static inline int orientedRows(const int src_rows)
+    {
+        return src_rows - 2;
+    }
+    static inline int orientedCols(const int src_cols)
+    {
+        return src_cols - 2;
     }
 
     static inline void oriented(const cv::Mat &src,
@@ -67,7 +93,7 @@ private:
     static inline void _standard(const cv::Mat& src,
                                  cv::Mat& dst)
     {
-        dst = cv::Mat_<uchar>(src.rows-2, src.cols-2, (uchar) 0);
+        dst = cv::Mat(src.rows-2, src.cols-2, CV_8UC1, cv::Scalar());
 
         const _Tp *src_ptr = src.ptr<_Tp>();
         uchar     *dst_ptr = dst.ptr<uchar>();
@@ -104,7 +130,7 @@ private:
     static inline void _shortened(const cv::Mat &src,
                                   cv::Mat &dst)
     {
-        dst = cv::Mat_<uchar>(src.rows-2, src.cols-2, (uchar) 0);
+        dst = cv::Mat(src.rows-2, src.cols-2, CV_8UC1, cv::Scalar());
 
         const _Tp *src_ptr = src.ptr<_Tp>();
         uchar     *dst_ptr = dst.ptr<uchar>();
@@ -143,7 +169,7 @@ private:
     static inline void _oriented(const cv::Mat &src,
                                  cv::Mat &dst)
     {
-        dst = cv::Mat_<uchar>(src.rows-2, src.cols-2, (uchar) 0);
+        dst = cv::Mat(src.rows-2, src.cols-2, CV_8UC1, cv::Scalar());
 
         const _Tp *src_ptr = src.ptr<_Tp>();
         uchar     *dst_ptr = dst.ptr<uchar>();

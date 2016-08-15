@@ -114,6 +114,7 @@ add_custom_target(show_cslibs_vision_header_in_qt SOURCES
     include/cslibs_vision/data/pose.h
     include/cslibs_vision/data/robot.h
 
+    include/cslibs_vision/features/magnitude.hpp
     include/cslibs_vision/features/homogenity.hpp
     include/cslibs_vision/features/lbp.hpp
     include/cslibs_vision/features/ltp.hpp
