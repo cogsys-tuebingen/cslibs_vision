@@ -2,6 +2,7 @@
 #define ACF_HPP
 
 #include <opencv2/opencv.hpp>
+#include <type_traits>
 
 #include "hog.hpp"
 #include "lbp.hpp"
@@ -16,8 +17,18 @@ class ACF {
 public:
     ACF() = delete;
 
-protected:
+    struct Parameters {
+        double hog_bin_size;
+        bool   normalize_magnitude;
 
+        Parameters() :
+            hog_bin_size(rad(30.0)),
+            normalize_magnitude(true)
+        {
+        }
+    };
+
+protected:
     inline static void resample(const cv::Mat &src,
                                 cv::Mat &dst)
     {
@@ -140,17 +151,6 @@ class ACFStandard : public ACF
 public:
     ACFStandard() = delete;
 
-    struct Parameters {
-        double hog_bin_size;
-        bool   normalize_magnitude;
-
-        Parameters() :
-            hog_bin_size(rad(30.0)),
-            normalize_magnitude(true)
-        {
-        }
-    };
-
     inline static void compute(const cv::Mat &src,
                                const Parameters &params,
                                cv::Mat &dst)
@@ -169,15 +169,13 @@ public:
         cv::Mat kernel = createKernel2D();
         /// 1. filter
         cv::filter2D(src_as_float, src_as_float, CV_32F, kernel);
-
-        cv::Mat magnitude;
-        double  max_magnitude;
-        std::vector<cv::Mat> hog;
-
         if(channels == 1) {
             /// 2. calculate magnitude + 3. calculate hog
+            cv::Mat magnitude;
+            double  max_magnitude;
+            std::vector<cv::Mat> hog;
             HOG::standard(src_as_float, params.hog_bin_size, hog, magnitude, max_magnitude);
-            if(params.normalize_magnitude) {
+            if(!params.normalize_magnitude) {
                 max_magnitude = 1.0;
             }
 
@@ -211,11 +209,15 @@ public:
                 }
             }
         } else {
-            /// 2. calculate magnitude + 3. calculate hog
             cv::Mat gray;
             cv::cvtColor(src, gray, CV_BGR2GRAY);
+
+            /// 2. calculate magnitude + 3. calculate hog
+            cv::Mat magnitude;
+            double  max_magnitude;
+            std::vector<cv::Mat> hog;
             HOG::standard(gray, params.hog_bin_size, hog, magnitude, max_magnitude);
-            if(params.normalize_magnitude) {
+            if(!params.normalize_magnitude) {
                 max_magnitude = 1.0;
             }
 
@@ -269,35 +271,135 @@ class ACFDynamic : public ACF
 public:
     ACFDynamic() = delete;
 
-    struct Parameters {
-        enum ChannelType {MAGNITUDE, HOG, LUV, LBP, LTP, WLD, HOMOGENITY};
-
-        /// gives structure of channels in decriptor
-        std::vector<ChannelType> types;
-
+    struct Parameters : public ACF::Parameters {
+        enum ChannelType {MAGNITUDE = 1, HOG = 2, LUV = 4, LBP = 8, LTP = 16, WLD = 32, HOMOGENITY = 64};
+        ChannelType channel_types;
+        Parameters() :
+            ACF::Parameters(),
+            channel_types(MAGNITUDE + HOG + LUV)
+        {
+        }
     };
 
-    inline static void compute(const cv::Mat &src,
-                               const Parameters &params,
-                               cv::Mat &dst)
-    {
-        const std::size_t channels = src.channels();
-        cv::Mat src_as_float;
-        if(channels == 1) {
-            cv::normalize(src, src_as_float, 0.0, 1.0, cv::NORM_MINMAX, CV_32F);
 
-        } else if (channels == 3) {
-            cv::normalize(src, src_as_float, 0.0, 1.0, cv::NORM_MINMAX, CV_32F);
-        } else {
-            throw std::runtime_error("Channel size must be one or three");
-        }
+//    inline static void compute(const cv::Mat &src,
+//                               const Parameters &params,
+//                               cv::Mat &dst)
+//    {
+//        const std::size_t channels = src.channels();
+//        cv::Mat src_as_float;
+//        if(channels == 1) {
+//            cv::normalize(src, src_as_float, 0.0, 1.0, cv::NORM_MINMAX, CV_32F);
 
-        cv::Mat kernel = createKernel2D();
-        /// 1. filter
-        cv::filter2D(src_as_float, src_as_float, CV_32F, kernel);
+//        } else if (channels == 3) {
+//            cv::normalize(src, src_as_float, 0.0, 1.0, cv::NORM_MINMAX, CV_32F);
+//        } else {
+//            throw std::runtime_error("Channel size must be one or three");
+//        }
+
+//        cv::Mat kernel = createKernel2D();
+//        /// 1. filter
+//        cv::filter2D(src_as_float, src_as_float, CV_32F, kernel);
+//        if(channel == 1) {
+//            std::vector<cv::Mat>     channels(channel_count, cv::Mat());
+//            std::vector<std::size_t> channel_sizes(channel_count, 0);
+//            std::vector<double>      normalization(channel_count, 1.0);
+//            std::size_t              pos = 0;
+
+//            if(params.channel_types & Parameters::HOG != 0) {
+//                cv::Mat magnitude;
+//                double  max_magnitude;
+//                std::vector<cv::Mat> hog;
+//                HOG::standard(gray, params.hog_bin_size, hog, magnitude, max_magnitude);
+
+//                if(!params.normalize_magnitude) {
+//                    max_magnitude = 1.0;
+//                }
+
+//                if(params.channel_types & Parameters::MAGNITUDE) {
+//                    channels[pos] = std::move(magnitude);
+//                    normalization[pos] = max_magnitude;
+//                    channel_sizes[pos] = magnitude.cols * magnitude.rows;
+//                    ++pos;
+//                }
+//                for(cv::Mat &h : hog) {
+//                    channels[pos] = std::move(h);
+//                    normalization[pos] = max_magnitude;
+//                    channel_sizes[pos] = h.cols * h.rows;
+//                    ++pos;
+//                }
+
+//            } else if(params.channel_types & Parameters::MAGNITUDE != 0) {
+//                cv::Mat dx;
+//                cv::Mat dy;
+//                cv::Sobel(src, dx, CV_32F, 1, 0);
+//                cv::Sobel(src, dy, CV_32F, 0, 1);
+//                cv::magnitude(dx, dy, channels[pos]);
+//                cv::Mat &magnitude = channels[pos];
+//                channel_sizes[pos] = magnitude.cols * magnitude.rows;
+//                if(params.normalize_magnitude) {
+//                    double min;
+//                    cv::minMaxLoc(magnitude, &min, &normalization[pos]);
+//                }
+//                ++pos;
+//            }
+//            if(params.channel_types & Parameters::LBP != 0) {
+
+//            }
+//            if(params.channel_types & Parameters::LTP != 0) {
+
+//            }
+//            if(params.channel_types & Parameters::WLD != 0) {
+
+//            }
+//            if(params.channel_types & Parameters::HOMOGENITY != 0) {
+
+//            }
+//        } else {
+//            cv::Mat gray;
+//            cv::cvtColor(src, gray, CV_BGR2GRAY);
+//            if(params.channel_types & Parameters::MAGNITUDE != 0) {
+
+//            }
+//            if(params.channel_types & Parameters::HOG != 0) {
+
+//            }
+//            if(params.channel_types & Parameters::LBP != 0) {
+
+//            }
+//            if(params.channel_types & Parameters::LTP != 0) {
+
+//            }
+//            if(params.channel_types & Parameters::WLD != 0) {
+
+//            }
+//            if(params.channel_types & Parameters::HOMOGENITY != 0) {
+
+//            }
+//        }
+//    }
+
+//protected:
+//    template<std::size_t N>
+//    struct Bits {
+//        static_assert(N > 0, "N must be greater 0");
+//        inline static std::size_t count(const int n)
+//        {
+//            return (n & 0x1) + Bits<N-1>::count(n >> 1);
+//        }
+
+//    };
+
+//    template<>
+//    struct Bits<0> {
+//        inline static std::size_t count(const int n)
+//        {
+//            return n & 0x1;
+//        }
+
+//    };
 
 
-    }
 };
 
 }
