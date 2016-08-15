@@ -15,6 +15,8 @@ namespace cslibs_vision {
 class WLD
 {
 public:
+    WLD() = delete;
+
     static inline void standard(const cv::Mat &src,
                                 cv::Mat &dst)
     {

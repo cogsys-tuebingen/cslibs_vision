@@ -10,6 +10,8 @@ namespace cslibs_vision {
  */
 class LTP {
 public:
+    LTP() = delete;
+
     template <typename _Tp>
     static inline void histogram(const cv::Mat &src,
                                  const _Tp k,

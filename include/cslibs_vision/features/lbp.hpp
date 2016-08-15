@@ -11,6 +11,8 @@ namespace cslibs_vision {
 class LBP
 {
 public:
+    LBP() = delete;
+
     template <typename _Tp>
     static inline void histogram(const cv::Mat &src,
                                  const double k,

@@ -7,6 +7,8 @@ namespace cslibs_vision {
 class Homogenity
 {
 public:
+    Homogenity() = delete;
+
     static inline void standard(const cv::Mat &src,
                                 cv::Mat &dst)
     {

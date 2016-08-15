@@ -3,135 +3,85 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "hog.hpp"
+#include "lbp.hpp"
+#include "ltp.hpp"
+#include "wld.hpp"
+#include "homogenity.hpp"
 
 namespace cslibs_vision {
 
-/**
- * @brief The ACF - Aggregated Channel Features
- */
-class ACF
-{
+
+class ACF {
 public:
-    struct Parameters {
-        enum ChannelType {MAGNITUDE, HOG, LUV};
-    };
+    ACF() = delete;
 
-    ACF()
+protected:
+
+    inline static void resample(const cv::Mat &src,
+                                cv::Mat &dst)
     {
-    }
-
-    void compute(const cv::Mat &src,
-                 cv::Mat &dst)
-    {
-        if(src.channels() != 1 && src.channels() != 3) {
-            throw std::runtime_error("Channel size must be one or three");
-        }
-
-        assert(src.type() == CV_8UC3);
-        if(!channels.empty()) {
-            channels.clear();
-        }
-
-        /// preparation
-        cv::Mat kernel = impl::createKernel2D();
-        cv::Mat src_as_float;
-        src.convertTo(src_as_float, CV_32FC3, 1./255.);
-        cv::filter2D(src_as_float, src_as_float, CV_32F, kernel);
-        /// normalized gradient magnitude
-        cv::Mat norm_grad_mag(src.rows, src.cols, CV_32FC1, cv::Scalar());
-
-        cv::Mat gray;
-        cv::Mat dx;
-        cv::Mat dy;
-        cv::cvtColor(src, gray, CV_BGR2GRAY);
-        cv::Sobel(gray, dx, CV_32F, 1, 0);
-        cv::Sobel(gray, dy, CV_32F, 0, 1);
-        cv::magnitude(dx, dy, norm_grad_mag);
-
-        channels.emplace_back(norm_grad_mag);
-
-        /// HOG with 30° bins
-        std::vector<cv::Mat> hog_buffer(6, cv::Mat(norm_grad_mag.rows,
-                                                   norm_grad_mag.cols,
-                                                   CV_32FC1,
-                                                   cv::Scalar()));
-        const double bin_step = impl::rad(30.0);
-        for(int i = 0 ; i < norm_grad_mag.rows ; ++i) {
-            for(int j = 0 ; j < norm_grad_mag.cols ; ++j) {
-                double angle = atan2(dy.at<float>(i,j), dx.at<float>(i,j));
-                if(angle < 0) {
-                    angle += M_PI;
-                }
-                std::size_t index = (int)(angle / bin_step) % 6;
-                hog_buffer.at(index).at<float>(i,j) = norm_grad_mag.at<float>(i,j); // * 255.0
-            }
-        }
-
-        channels.insert(channels.end(), hog_buffer.begin(), hog_buffer.end());
-
-        /// LUV -> it is important to set the destination type otherwise it won' work!
-        cv::Mat luv = cv::Mat(src.rows, src.cols, CV_32FC3, cv::Scalar());
-        cv::cvtColor(src_as_float, luv, CV_BGR2Luv);
-        std::vector<cv::Mat> luv_buffer;
-        cv::split(luv, luv_buffer);
-        channels.insert(channels.end(), luv_buffer.begin(), luv_buffer.end());
-
-        int size = 0;
-        for(cv::Mat &channel : channels) {
-            resample(channel, channel);
-            cv::filter2D(channel, channel,CV_32F, kernel);
-            size += channel.rows * channel.cols;
-        }
-
-        dst = cv::Mat(1, size, CV_32FC1, cv::Scalar());
-        float *dst_ptr = dst.ptr<float>();
-        int pos = 0;
-        for(cv::Mat &channel : channels) {
-            if(channel.type() != CV_32FC1)
-                throw std::runtime_error("Something went just horribly wrong!");
-
-            int channel_size = channel.rows * channel.cols;
-            const float *channel_ptr = channel.ptr<float>();
-            for(int i = 0 ; i < channel_size ; ++i) {
-                dst_ptr[pos] = channel_ptr[i];
-                ++pos;
-            }
-        }
-    }
-
-private:
-    constexpr static double RESCALE = 0.5;
-
-    inline void resample(const cv::Mat &src,
-                         cv::Mat &dst)
-    {
-        assert(src.type() == CV_32FC1);
+        assert(src.depth() == CV_32F);
 
         cv::Mat buffer = cv::Mat(src.rows / 4,
                                  src.cols / 4,
-                                 CV_32FC1,
+                                 src.type(),
                                  cv::Scalar());
 
         const static int dx[] = {0, 1, 0, 1};
         const static int dy[] = {0, 0, 1, 1};
+        const int channels = src.channels();
+        const int step_src = src.cols * channels;
+        const int step_dst = dst.cols * channels;
         const float * src_ptr = src.ptr<float>();
         float * dst_ptr = buffer.ptr<float>();
-        int pos = 0;
         for(int i = 0 ; i < buffer.rows ; ++i) {
-            for(int j = 0 ; j < buffer.cols; ++j) {
-                int pos_src = 4 * i * src.cols + 4 * j;
-                for(int k = 0 ; k < 4 ; ++k) {
-                    dst_ptr[pos] += src_ptr[pos_src + dx[k] + dy[k] * src.cols];
+            for(int j = 0 ; j < buffer.cols ; ++j) {
+                int pos_dst = step_dst * i + channels * j;
+                int pos_src = 4 * (i * step_src + j);
+                for(int c = 0 ; c < channels; ++c) {
+                    for(int d = 0 ; d < 4 ; ++d) {
+                        dst_ptr[pos_dst] += src_ptr[pos_src + dy[k] * step_src + dx[k] * channels + c];
+                    }
                 }
-                ++pos;
             }
         }
-        std::swap(buffer, dst);
+        dst = std::move(buffer);
     }
 
+    //    inline static void resample(const cv::Mat &src,
+    //                                cv::Mat &dst)
+    //    {
+    //        assert(src.type() == CV_32FC1);
 
-    std::vector<cv::Mat> channels;
+    //        cv::Mat buffer = cv::Mat(src.rows / 4,
+    //                                 src.cols / 4,
+    //                                 CV_32FC1,
+    //                                 cv::Scalar());
 
+    //        const static int dx[] = {0, 1, 0, 1};
+    //        const static int dy[] = {0, 0, 1, 1};
+    //        const float * src_ptr = src.ptr<float>();
+    //        float * dst_ptr = buffer.ptr<float>();
+    //        int pos = 0;
+    //        for(int i = 0 ; i < buffer.rows ; ++i) {
+    //            for(int j = 0 ; j < buffer.cols; ++j) {
+    //                int pos_src = 4 * i * src.cols + 4 * j;
+    //                for(int k = 0 ; k < 4 ; ++k) {
+    //                    dst_ptr[pos] += src_ptr[pos_src + dx[k] + dy[k] * src.cols];
+    //                }
+    //                ++pos;
+    //            }
+    //        }
+    //        dst = std::move(buffer);
+    //    }
+
+
+
+    /**
+     * @brief createKernel1D produces an [1 2 1] kernel normalized by 4.
+     * @return
+     */
     inline static const cv::Mat createKernel1D()
     {
         cv::Mat kernel(3,3,CV_32FC1, cv::Scalar());
@@ -144,6 +94,10 @@ private:
         return kernel;
     }
 
+    /**
+     * @brief createKernel2D produces a [[1 2 1],[2,4,2],[1,2,1]] kernel normalized by 16.
+     * @return
+     */
     inline static const cv::Mat createKernel2D()
     {
         cv::Mat kernel(3,3,CV_32FC1, cv::Scalar());
@@ -165,17 +119,185 @@ private:
     }
 
     template<typename T>
-    inline T deg(const T rad)
+    inline static T deg(const T rad)
     {
         return M_1_PI * rad * 180.0;
     }
 
     template<typename T>
-    inline T rad(const T deg)
+    inline static T rad(const T deg)
     {
         return M_PI * 1. / 180. * deg;
     }
+};
 
+
+/**
+ * @brief The ACF - Aggregated Channel Features
+ */
+class ACFStandard : public ACF
+{
+public:
+    ACFStandard() = delete;
+
+    struct Parameters {
+        double hog_bin_size;
+        bool   normalize_magnitude;
+
+        Parameters() :
+            hog_bin_size(rad(30.0)),
+            normalize_magnitude(true)
+        {
+        }
+    };
+
+    inline static void compute(const cv::Mat &src,
+                               const Parameters &params,
+                               cv::Mat &dst)
+    {
+        const std::size_t channels = src.channels();
+        cv::Mat src_as_float;
+        if(channels == 1) {
+            cv::normalize(src, src_as_float, 0.0, 1.0, cv::NORM_MINMAX, CV_32F);
+
+        } else if (channels == 3) {
+            cv::normalize(src, src_as_float, 0.0, 1.0, cv::NORM_MINMAX, CV_32F);
+        } else {
+            throw std::runtime_error("Channel size must be one or three");
+        }
+
+        cv::Mat kernel = createKernel2D();
+        /// 1. filter
+        cv::filter2D(src_as_float, src_as_float, CV_32F, kernel);
+
+        cv::Mat magnitude;
+        double  max_magnitude;
+        std::vector<cv::Mat> hog;
+
+        if(channels == 1) {
+            /// 2. calculate magnitude + 3. calculate hog
+            HOG::standard(src_as_float, params.hog_bin_size, hog, magnitude, max_magnitude);
+            if(params.normalize_magnitude) {
+                max_magnitude = 1.0;
+            }
+
+            resample(magnitude, magnitude);
+            cv::filter2D(magnitude, magnitude, CV_32F, kernel);
+            std::size_t feature_size = magnitude.rows * magnitude.cols;
+
+            for(cv::Mat &h : hog) {
+                resample(h,h);
+                cv::filter2D(h, h, CV_32F, kernel);
+                feature_size += h.cols * h.rows;
+            }
+
+            /// 4. LUV cannot be added for grayscale
+            /// 5. Copy the data to the destination
+            dst = cv::Mat(1, feature_size, CV_32FC1, cv::Scalar());
+            float *dst_ptr = dst.ptr<float>();
+            int    dst_pos = 0;
+
+            const int    magnitude_size = magnitude.rows * magnitude.cols;
+            const float *magnitude_ptr = magnitude.ptr<float>();
+            for(int i = 0; i < magnitude_size ; ++i, ++dst_pos) {
+                dst_ptr[dst_pos] = magnitude_ptr[i] / max_magnitude;
+            }
+
+            for(cv::Mat &h : hog) {
+                const int    hog_size = h.rows * h.cols;
+                const float *hog_ptr = h.ptr<float>();
+                for(int i = 0 ; i < hog_size ; ++i, ++dst_pos) {
+                    dst_ptr[dst_pos] = hog_ptr[i] / max_magnitude;
+                }
+            }
+        } else {
+            /// 2. calculate magnitude + 3. calculate hog
+            cv::Mat gray;
+            cv::cvtColor(src, gray, CV_BGR2GRAY);
+            HOG::standard(gray, params.hog_bin_size, hog, magnitude, max_magnitude);
+            if(params.normalize_magnitude) {
+                max_magnitude = 1.0;
+            }
+
+            resample(magnitude, magnitude);
+            cv::filter2D(magnitude, magnitude, CV_32F, kernel);
+            std::size_t feature_size = magnitude.rows * magnitude.cols;
+
+            for(cv::Mat &h : hog) {
+                resample(h,h);
+                cv::filter2D(h,h, CV_32F, kernel);
+                feature_size += h.cols * h.rows;
+            }
+
+            /// 4. LUV -> it is important to set the destination type otherwise it won' work!
+            cv::Mat luv = cv::Mat(src.rows, src.cols, CV_32FC3, cv::Scalar());
+            cv::cvtColor(src_as_float, luv, CV_BGR2Luv);
+            resample(luv, luv);
+            cv::filter2D(luv, luv, CV_32F, kernel);
+            feature_size += luv.cols * luv.rows * 3; // 3 <=> L * U * V
+
+            dst = cv::Mat(1, feature_size, CV_32FC1, cv::Scalar());
+            float *dst_ptr = dst.ptr<float>();
+            int    dst_pos = 0;
+
+            const int    magnitude_size = magnitude.rows * magnitude.cols;
+            const float *magnitude_ptr = magnitude.ptr<float>();
+            for(int i = 0; i < magnitude_size ; ++i, ++dst_pos) {
+                dst_ptr[dst_pos] = magnitude_ptr[i] / max_magnitude;
+            }
+
+            for(cv::Mat &h : hog) {
+                const int    hog_size = h.rows * h.cols;
+                const float *hog_ptr = h.ptr<float>();
+                for(int i = 0 ; i < hog_size ; ++i, ++dst_pos) {
+                    dst_ptr[dst_pos] = hog_ptr[i] / max_magnitude;
+                }
+            }
+
+            const int luv_size = luv.rows * luv.cols * 3;
+            const float *luv_ptr = luv.ptr<float>();
+            for(int i = 0 ; i < luv_size ; ++i, ++dst_pos) {
+                dst_ptr[dst_pos] = luv_ptr[i];
+            }
+        }
+
+    }
+};
+
+class ACFDynamic : public ACF
+{
+public:
+    ACFDynamic() = delete;
+
+    struct Parameters {
+        enum ChannelType {MAGNITUDE, HOG, LUV, LBP, LTP, WLD, HOMOGENITY};
+
+        /// gives structure of channels in decriptor
+        std::vector<ChannelType> types;
+
+    };
+
+    inline static void compute(const cv::Mat &src,
+                               const Parameters &params,
+                               cv::Mat &dst)
+    {
+        const std::size_t channels = src.channels();
+        cv::Mat src_as_float;
+        if(channels == 1) {
+            cv::normalize(src, src_as_float, 0.0, 1.0, cv::NORM_MINMAX, CV_32F);
+
+        } else if (channels == 3) {
+            cv::normalize(src, src_as_float, 0.0, 1.0, cv::NORM_MINMAX, CV_32F);
+        } else {
+            throw std::runtime_error("Channel size must be one or three");
+        }
+
+        cv::Mat kernel = createKernel2D();
+        /// 1. filter
+        cv::filter2D(src_as_float, src_as_float, CV_32F, kernel);
+
+
+    }
 };
 
 }
