@@ -9,6 +9,17 @@ public:
     Magnitude() = delete;
 
     inline static void compute(const cv::Mat &src,
+                               cv::Mat &dst,
+                               cv::Mat &dx,
+                               cv::Mat &dy)
+    {
+        cv::Sobel(src, dx, CV_32F, 1, 0);
+        cv::Sobel(src, dy, CV_32F, 0, 1);
+        cv::magnitude(dx, dy, dst);
+
+    }
+
+    inline static void compute(const cv::Mat &src,
                                cv::Mat &dst)
     {
         cv::Mat dx;

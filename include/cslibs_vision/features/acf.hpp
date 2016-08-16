@@ -13,6 +13,27 @@
 
 namespace cslibs_vision {
 
+namespace impl {
+template<std::size_t N>
+struct Bits {
+    static_assert(N > 0, "N must be greater 0");
+    inline static std::size_t count(const int n)
+    {
+        return (n & 0x1) + Bits<N-1>::count(n >> 1);
+    }
+
+};
+
+template<>
+struct Bits<0> {
+    inline static std::size_t count(const int n)
+    {
+        return n & 0x1;
+    }
+
+};
+}
+
 
 class ACF {
 public:
@@ -30,14 +51,18 @@ public:
     };
 
 protected:
-    static constexpr cv::Size resampling_block_size = cv::Size(4,4);
+    struct ResamplingBlockSize {
+        const static int width = 4;
+        const static int height = 4;
+    };
+
 
     template<typename T>
     inline static void resample(const cv::Mat &src,
                                 cv::Mat &dst)
     {
-        cv::Mat buffer = cv::Mat(src.rows / resampling_block_size.height,
-                                 src.cols / resampling_block_size.width,
+        cv::Mat buffer = cv::Mat(src.rows / ResamplingBlockSize::height,
+                                 src.cols / ResamplingBlockSize::width,
                                  CV_32FC(src.channels()),
                                  cv::Scalar());
 
@@ -54,7 +79,7 @@ protected:
                 int pos_src = 4 * (i * step_src + j);
                 for(int c = 0 ; c < channels; ++c) {
                     for(int d = 0 ; d < 4 ; ++d) {
-                        dst_ptr[pos_dst] += (float) src_ptr[pos_src + dy[k] * step_src + dx[k] * channels + c];
+                        dst_ptr[pos_dst] += (float) src_ptr[pos_src + dy[c] * step_src + dx[c] * channels + c];
                     }
                 }
             }
@@ -253,29 +278,11 @@ class ACFDynamic : public ACF
 public:
     ACFDynamic() = delete;
 
-    template<std::size_t N>
-    struct Bits {
-        static_assert(N > 0, "N must be greater 0");
-        inline static std::size_t count(const int n)
-        {
-            return (n & 0x1) + Bits<N-1>::count(n >> 1);
-        }
-
-    };
-
-    template<>
-    struct Bits<0> {
-        inline static std::size_t count(const int n)
-        {
-            return n & 0x1;
-        }
-
-    };
 
     struct Parameters : public ACF::Parameters {
         enum ChannelType {MAGNITUDE = 1, HOG = 2, LUV = 4, LBP = 8, LTP = 16, WLD = 32, HOMOGENITY = 64};
 
-        ChannelType     channel_types;
+        int             channel_types;
         bool            normalize_patterns;
         double          k;
 
@@ -298,53 +305,53 @@ public:
         }
 
         inline std::size_t featureSize(const int src_rows,
-                                       const int src_cols)
+                                       const int src_cols) const
         {
 
             std::size_t size = 0;
             if(has(MAGNITUDE)) {
-                size += src_rows / resampling_block_size.height *
-                        src_cols / resampling_block_size.width;
+                size += src_rows / ResamplingBlockSize::height *
+                        src_cols / ResamplingBlockSize::width;
             }
             if(has(HOG)) {
-                size +=  src_rows / resampling_block_size.height *
-                        src_cols / resampling_block_size.width *
+                size +=  src_rows / ResamplingBlockSize::height *
+                        src_cols / ResamplingBlockSize::width *
                         cslibs_vision::HOG::standarBins(hog_bin_size);
             }
             if(has(LUV)) {
-                size += src_rows / resampling_block_size.height *
-                        src_cols / resampling_block_size.width *
+                size += src_rows / ResamplingBlockSize::height *
+                        src_cols / ResamplingBlockSize::width *
                         3;  /// L U V
             }
             if(has(LBP)) {
                 assert(src_rows > 2);
                 assert(src_cols > 2);
-                size += cslibs_vision::LBP::standardRows(src_rows) / resampling_block_size.height *
-                        cslibs_vision::LBP::standardCols(src_cols) / resampling_block_size.width;
+                size += cslibs_vision::LBP::standardRows(src_rows) / ResamplingBlockSize::height *
+                        cslibs_vision::LBP::standardCols(src_cols) / ResamplingBlockSize::width;
             }
             if(has(LTP)) {
                 assert(src_rows > 2);
                 assert(src_cols > 2);
-                size += cslibs_vision::LTP::standardRows(src_rows) / resampling_block_size.height *
-                        cslibs_vision::LTP::standardCols(src_cols) / resampling_block_size.width *
+                size += cslibs_vision::LTP::standardRows(src_rows) / ResamplingBlockSize::height *
+                        cslibs_vision::LTP::standardCols(src_cols) / ResamplingBlockSize::width *
                         2; /// upper and lower ternary channel
             }
             if(has(WLD)) {
                 assert(src_rows > 2);
                 assert(src_cols > 2);
-                size += cslibs_vision::WLD::standardRows(src_rows) / resampling_block_size.height *
-                        cslibs_vision::WLD::standardCols(src_cols) / resampling_block_size;
+                size += cslibs_vision::WLD::standardRows(src_rows) / ResamplingBlockSize::height *
+                        cslibs_vision::WLD::standardCols(src_cols) / ResamplingBlockSize::width;
             }
             if(has(HOMOGENITY)) {
                 assert(src_rows > 2);
                 assert(src_cols > 2);
-                size += cslibs_vision::Homogenity::standardRows(src_rows) / resampling_block_size.height *
-                        cslibs_vision::Homogenity::standardCols(src_cols) / resampling_block_size;
+                size += cslibs_vision::Homogenity::standardRows(src_rows) / ResamplingBlockSize::height *
+                        cslibs_vision::Homogenity::standardCols(src_cols) / ResamplingBlockSize::width;
             }
             return size;
         }
 
-        inline bool has(const ChannelType type)
+        inline bool has(const ChannelType type) const
         {
             return (channel_types & type) != 0x0;
         }
@@ -371,7 +378,9 @@ public:
 
         if(channels == 1) {
             //// 1 Channel
-            params.unsetChannel(Parameters::LUV);
+            if(params.has(Parameters::LUV))
+                throw std::runtime_error("Cannot use channel type 'LUV' with mono channel images!");
+
             const std::size_t feature_size = params.featureSize(src.rows, src.cols);
             dst = cv::Mat(1, feature_size, CV_32FC1, cv::Scalar());
             float      *dst_ptr = dst.ptr<float>();
@@ -381,7 +390,7 @@ public:
                 cv::Mat magnitude;
                 double  max_magnitude;
                 std::vector<cv::Mat> hog;
-                HOG::standard(src_as_float, params.hog_bin_size, magnitude, max_magnitude);
+                HOG::standard(src_as_float, params.hog_bin_size, hog, magnitude, max_magnitude);
                 if(!params.normalize_magnitude) {
                     max_magnitude = 1.0;
                 }
@@ -434,8 +443,8 @@ public:
                 if(params.normalize_patterns)
                     norm = 255.f;
 
-                const int lbp_size = lbp.rows * lbp.cols;
-                const float lbp_ptr = lbp.ptr<float>();
+                const int    lbp_size = lbp.rows * lbp.cols;
+                const float *lbp_ptr = lbp.ptr<float>();
                 for(int i = 0 ; i < lbp_size ; ++i, ++dst_pos) {
                     dst_ptr[dst_pos] = lbp_ptr[i] / norm;
                 }
@@ -510,7 +519,7 @@ public:
                 cv::Mat magnitude;
                 double  max_magnitude;
                 std::vector<cv::Mat> hog;
-                HOG::standard(gray_as_float, params.hog_bin_size, magnitude, max_magnitude);
+                HOG::standard(gray_as_float, params.hog_bin_size, hog, magnitude, max_magnitude);
                 if(!params.normalize_magnitude) {
                     max_magnitude = 1.0;
                 }
@@ -581,8 +590,8 @@ public:
                 if(params.normalize_patterns)
                     norm = 255.f;
 
-                const int lbp_size = lbp.rows * lbp.cols;
-                const float lbp_ptr = lbp.ptr<float>();
+                const int    lbp_size = lbp.rows * lbp.cols;
+                const float *lbp_ptr = lbp.ptr<float>();
                 for(int i = 0 ; i < lbp_size ; ++i, ++dst_pos) {
                     dst_ptr[dst_pos] = lbp_ptr[i] / norm;
                 }
