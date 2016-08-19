@@ -2,7 +2,6 @@
 #define CV_HISTOGRAM_HPP
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <boost/assign.hpp>
 
 /**
  * @namespace cv_histogram is a namespace containing functions that make calculating histograms easier.
@@ -17,14 +16,15 @@ const cv::Scalar COLOR_CYAN    = cv::Scalar(255, 255,0);
 const cv::Scalar COLOR_WHITE   = cv::Scalar(255,255,255);
 const cv::Scalar COLOR_YELLOW  = cv::Scalar(0,255,255);
 const cv::Scalar COLOR_MAGENTA = cv::Scalar(255,0,255);
-const std::vector<cv::Scalar>  COLOR_PALETTE = boost::assign::list_of
-        (COLOR_BLUE)
-        (COLOR_GREEN)
-        (COLOR_RED)
-        (COLOR_CYAN)
-        (COLOR_WHITE)
-        (COLOR_YELLOW)
-        (COLOR_MAGENTA);
+const std::vector<cv::Scalar>  COLOR_PALETTE = {
+        COLOR_BLUE,
+        COLOR_GREEN,
+        COLOR_RED,
+        COLOR_CYAN,
+        COLOR_WHITE,
+        COLOR_YELLOW,
+        COLOR_MAGENTA,
+};
 
 /**
  * @brief Normalize a rgb image.
