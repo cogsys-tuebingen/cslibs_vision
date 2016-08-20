@@ -41,6 +41,7 @@ public:
 
     struct Parameters {
         double hog_bin_size;
+        bool   hog_directed ;
         bool   normalize_magnitude;
 
         Parameters() :
@@ -50,6 +51,17 @@ public:
         }
     };
 
+    template<typename T>
+    inline static T deg(const T rad)
+    {
+        return M_1_PI * rad * 180.0;
+    }
+
+    template<typename T>
+    inline static T rad(const T deg)
+    {
+        return M_PI * 1. / 180. * deg;
+    }
 protected:
     struct ResamplingBlockSize {
         const static int width = 4;
@@ -66,25 +78,27 @@ protected:
                                  CV_32FC(src.channels()),
                                  cv::Scalar());
 
+        assert(src.depth() == CV_32F);
+
         const static int dx[] = {0, 1, 0, 1};
         const static int dy[] = {0, 0, 1, 1};
         const int channels = src.channels();
         const int step_src = src.cols * channels;
-        const int step_dst = dst.cols * channels;
+        const int step_buffer = buffer.cols * channels;
         const T * src_ptr = src.ptr<T>();
-        float * dst_ptr = buffer.ptr<float>();
+        float * buffer_ptr = buffer.ptr<float>();
         for(int i = 0 ; i < buffer.rows ; ++i) {
             for(int j = 0 ; j < buffer.cols ; ++j) {
-                int pos_dst = step_dst * i + channels * j;
+                int pos_buffer = step_buffer * i + channels * j;
                 int pos_src = 4 * (i * step_src + j);
                 for(int c = 0 ; c < channels; ++c) {
                     for(int d = 0 ; d < 4 ; ++d) {
-                        dst_ptr[pos_dst] += (float) src_ptr[pos_src + dy[c] * step_src + dx[c] * channels + c];
+                        buffer_ptr[pos_buffer] += (float) src_ptr[pos_src + dy[d] * step_src + dx[d] * channels + c];
                     }
                 }
             }
         }
-        dst = std::move(buffer);
+        dst = buffer;
     }
 
     /**
@@ -125,18 +139,6 @@ protected:
         data[8] = 1.f * factor;
 
         return kernel;
-    }
-
-    template<typename T>
-    inline static T deg(const T rad)
-    {
-        return M_1_PI * rad * 180.0;
-    }
-
-    template<typename T>
-    inline static T rad(const T deg)
-    {
-        return M_PI * 1. / 180. * deg;
     }
 };
 
@@ -265,11 +267,7 @@ public:
                     }
                 }
             }
-            //            for(int i = 0 ; i < luv_size ; ++i, ++dst_pos) {
-            //                dst_ptr[dst_pos] = luv_ptr[i];
-            //            }
         }
-
     }
 };
 
