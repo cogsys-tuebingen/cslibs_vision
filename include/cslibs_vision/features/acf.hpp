@@ -170,6 +170,8 @@ public:
 
         cv::Mat kernel;
         switch(params.kernel_type) {
+        case Parameters::NONE:
+            break;
         case Parameters::KERNEL_1D:
             kernel = createKernel1D();
             break;
