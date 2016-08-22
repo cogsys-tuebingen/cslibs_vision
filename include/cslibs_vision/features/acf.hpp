@@ -40,13 +40,18 @@ public:
     ACF() = delete;
 
     struct Parameters {
-        double hog_bin_size;
-        bool   hog_directed ;
-        bool   normalize_magnitude;
+        enum KernelType {NONE, KERNEL_1D, KERNEL_2D};
+
+        double     hog_bin_size;
+        bool       hog_directed ;
+        bool       normalize_magnitude;
+        KernelType kernel_type;
 
         Parameters() :
             hog_bin_size(rad(30.0)),
-            normalize_magnitude(true)
+            hog_directed(false),
+            normalize_magnitude(true),
+            kernel_type(KERNEL_2D)
         {
         }
     };
@@ -157,18 +162,27 @@ public:
     {
         const std::size_t channels = src.channels();
         cv::Mat src_as_float;
-        if(channels == 1) {
-            cv::normalize(src, src_as_float, 0.0, 1.0, cv::NORM_MINMAX, CV_32F);
-
-        } else if (channels == 3) {
+        if(channels == 1 || channels == 3) {
             cv::normalize(src, src_as_float, 0.0, 1.0, cv::NORM_MINMAX, CV_32F);
         } else {
             throw std::runtime_error("Channel size must be one or three");
         }
 
-        cv::Mat kernel = createKernel2D();
+        cv::Mat kernel;
+        switch(params.kernel_type) {
+        case Parameters::KERNEL_1D:
+            kernel = createKernel1D();
+            break;
+        case Parameters::KERNEL_2D:
+            kernel = createKernel2D();
+            break;
+        default:
+            throw std::runtime_error("Unknown kernel type!");
+        }
+
         /// 1. filter
-        cv::filter2D(src_as_float, src_as_float, CV_32F, kernel);
+        if(params.kernel_type != Parameters::NONE)
+            cv::filter2D(src_as_float, src_as_float, CV_32F, kernel);
         if(channels == 1) {
             /// 2. calculate magnitude + 3. calculate hog
             cv::Mat magnitude;
@@ -180,12 +194,14 @@ public:
             }
 
             resample<float>(magnitude, magnitude);
-            cv::filter2D(magnitude, magnitude, CV_32F, kernel);
+            if(params.kernel_type != Parameters::NONE)
+                cv::filter2D(magnitude, magnitude, CV_32F, kernel);
             std::size_t feature_size = magnitude.rows * magnitude.cols;
 
             for(cv::Mat &h : hog) {
                 resample<float>(h,h);
-                cv::filter2D(h, h, CV_32F, kernel);
+                if(params.kernel_type != Parameters::NONE)
+                    cv::filter2D(h, h, CV_32F, kernel);
                 feature_size += h.cols * h.rows;
             }
 
@@ -222,12 +238,14 @@ public:
             }
 
             resample<float>(magnitude, magnitude);
-            cv::filter2D(magnitude, magnitude, CV_32F, kernel);
+            if(params.kernel_type != Parameters::NONE)
+                cv::filter2D(magnitude, magnitude, CV_32F, kernel);
             std::size_t feature_size = magnitude.rows * magnitude.cols;
 
             for(cv::Mat &h : hog) {
                 resample<float>(h,h);
-                cv::filter2D(h,h, CV_32F, kernel);
+                if(params.kernel_type != Parameters::NONE)
+                    cv::filter2D(h,h, CV_32F, kernel);
                 feature_size += h.cols * h.rows;
             }
 
@@ -235,7 +253,8 @@ public:
             cv::Mat luv = cv::Mat(src.rows, src.cols, CV_32FC3, cv::Scalar());
             cv::cvtColor(src_as_float, luv, CV_BGR2Luv);
             resample<float>(luv, luv);
-            cv::filter2D(luv, luv, CV_32F, kernel);
+            if(params.kernel_type != Parameters::NONE)
+                cv::filter2D(luv, luv, CV_32F, kernel);
             feature_size += luv.cols * luv.rows * 3; // 3 <=> L * U * V
 
             dst = cv::Mat(1, feature_size, CV_32FC1, cv::Scalar());
@@ -243,7 +262,7 @@ public:
             int    dst_pos = 0;
 
             const int    magnitude_size = magnitude.rows * magnitude.cols;
-            const float *magnitude_ptr = magnitude.ptr<float>();
+            const float *magnitude_ptr  = magnitude.ptr<float>();
             for(int i = 0; i < magnitude_size ; ++i, ++dst_pos) {
                 dst_ptr[dst_pos] = magnitude_ptr[i] / max_magnitude;
             }
