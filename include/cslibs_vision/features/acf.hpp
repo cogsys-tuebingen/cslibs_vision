@@ -3,6 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <type_traits>
+#include <iostream>
 
 #include "hog.hpp"
 #include "lbp.hpp"
@@ -82,8 +83,6 @@ protected:
                                  src.cols / ResamplingBlockSize::width,
                                  CV_32FC(src.channels()),
                                  cv::Scalar());
-
-        assert(src.depth() == CV_32F);
 
         const static int dx[] = {0, 1, 0, 1};
         const static int dy[] = {0, 0, 1, 1};
@@ -377,15 +376,14 @@ public:
     };
 
     inline static void compute(const cv::Mat &src,
-                               const Parameters &params,
+                               const ACFDynamic::Parameters &params,
                                cv::Mat &dst)
     {
 
+        ACFDynamic::Parameters p = params;
         const std::size_t channels = src.channels();
         cv::Mat src_as_float;
-        if(channels == 1) {
-            cv::normalize(src, src_as_float, 0.0, 1.0, cv::NORM_MINMAX, CV_32F);
-        } else if (channels == 3) {
+        if(channels == 1 || channels == 3) {
             cv::normalize(src, src_as_float, 0.0, 1.0, cv::NORM_MINMAX, CV_32F);
         } else {
             throw std::runtime_error("Channel size must be one or three");
@@ -393,30 +391,30 @@ public:
 
         cv::Mat kernel = createKernel2D();
         /// 1. filter
-        cv::filter2D(src_as_float, src_as_float, CV_32F, kernel);
+        if(p.kernel_type != Parameters::NONE)
+            cv::filter2D(src_as_float, src_as_float, CV_32F, kernel);
 
         if(channels == 1) {
             //// 1 Channel
-            if(params.has(Parameters::LUV))
-                throw std::runtime_error("Cannot use channel type 'LUV' with mono channel images!");
-
-            const std::size_t feature_size = params.featureSize(src.rows, src.cols);
+            p.unsetChannel(Parameters::LUV);
+            const std::size_t feature_size = p.featureSize(src.rows, src.cols);
             dst = cv::Mat(1, feature_size, CV_32FC1, cv::Scalar());
             float      *dst_ptr = dst.ptr<float>();
             std::size_t dst_pos = 0;
 
-            if(params.has(Parameters::HOG)) {
+            if(p.has(Parameters::HOG)) {
                 cv::Mat magnitude;
                 double  max_magnitude;
                 std::vector<cv::Mat> hog;
-                HOG::standard(src_as_float, params.hog_bin_size, hog, magnitude, max_magnitude);
-                if(!params.normalize_magnitude) {
+                HOG::standard(src_as_float, p.hog_bin_size, hog, magnitude, max_magnitude);
+                if(!p.normalize_magnitude) {
                     max_magnitude = 1.0;
                 }
 
-                if(params.has(Parameters::MAGNITUDE)) {
+                if(p.has(Parameters::MAGNITUDE)) {
                     resample<float>(magnitude, magnitude);
-                    cv::filter2D(magnitude, magnitude, CV_32F, kernel);
+                    if(p.kernel_type != Parameters::NONE)
+                        cv::filter2D(magnitude, magnitude, CV_32F, kernel);
 
                     const int    magnitude_size = magnitude.rows * magnitude.cols;
                     const float *magnitude_ptr  = magnitude.ptr<float>();
@@ -426,7 +424,8 @@ public:
                 }
                 for(cv::Mat &h : hog) {
                     resample<float>(h,h);
-                    cv::filter2D(h,h, CV_32F, kernel);
+                    if(p.kernel_type != Parameters::NONE)
+                        cv::filter2D(h,h, CV_32F, kernel);
 
                     const int    hog_size = h.rows * h.cols;
                     const float *hog_ptr = h.ptr<float>();
@@ -434,17 +433,18 @@ public:
                         dst_ptr[dst_pos] = hog_ptr[i] / max_magnitude;
                     }
                 }
-            } else if(params.has(Parameters::MAGNITUDE)) {
+            } else if(p.has(Parameters::MAGNITUDE)) {
                 cv::Mat magnitude;
                 double norm = 1.0;
-                if(params.normalize_magnitude) {
+                if(p.normalize_magnitude) {
                     Magnitude::compute(src_as_float, magnitude, norm);
                 } else {
                     Magnitude::compute(src_as_float, magnitude);
                 }
 
                 resample<float>(magnitude, magnitude);
-                cv::filter2D(magnitude, magnitude, CV_32F, kernel);
+                if(p.kernel_type != Parameters::NONE)
+                    cv::filter2D(magnitude, magnitude, CV_32F, kernel);
 
                 const int    magnitude_size = magnitude.rows * magnitude.cols;
                 const float *magnitude_ptr = magnitude.ptr<float>();
@@ -452,14 +452,15 @@ public:
                     dst_ptr[dst_pos] = magnitude_ptr[i] / norm;
                 }
             }
-            if(params.has(Parameters::LBP)) {
+            if(p.has(Parameters::LBP)) {
                 cv::Mat lbp;
-                cslibs_vision::LBP::standard(src_as_float, params.k, lbp);
+                cslibs_vision::LBP::standard(src_as_float, p.k, lbp);
                 resample<uchar>(lbp,lbp);
-                cv::filter2D(lbp, lbp, CV_32F, kernel);
+                if(p.kernel_type != Parameters::NONE)
+                    cv::filter2D(lbp, lbp, CV_32F, kernel);
 
                 float norm = 1.f;
-                if(params.normalize_patterns)
+                if(p.normalize_patterns)
                     norm = 255.f;
 
                 const int    lbp_size = lbp.rows * lbp.cols;
@@ -468,14 +469,15 @@ public:
                     dst_ptr[dst_pos] = lbp_ptr[i] / norm;
                 }
             }
-            if(params.has(Parameters::LTP)) {
+            if(p.has(Parameters::LTP)) {
                 cv::Mat ltp;
-                cslibs_vision::LTP::standard(src_as_float, params.k, ltp);
+                cslibs_vision::LTP::standard(src_as_float, p.k, ltp);
                 resample<uchar>(ltp, ltp);
-                cv::filter2D(ltp, ltp, CV_32F, kernel);
+                if(p.kernel_type != Parameters::NONE)
+                    cv::filter2D(ltp, ltp, CV_32F, kernel);
 
                 float norm = 1.f;
-                if(params.normalize_patterns)
+                if(p.normalize_patterns)
                     norm = 255.f;
 
                 const int    ltp_channels = ltp.channels();
@@ -490,15 +492,16 @@ public:
                     }
                 }
             }
-            if(params.has(Parameters::WLD)) {
+            if(p.has(Parameters::WLD)) {
                 cv::Mat wld;
                 cslibs_vision::WLD::standard(src_as_float, wld);
 
                 resample<uchar>(wld, wld);
-                cv::filter2D(wld, wld, CV_32F, kernel);
+                if(p.kernel_type != Parameters::NONE)
+                    cv::filter2D(wld, wld, CV_32F, kernel);
 
                 float norm = 1.f;
-                if(params.normalize_patterns)
+                if(p.normalize_patterns)
                     norm = 255.f;
 
                 const int    wld_size = wld.cols * wld.rows;
@@ -507,15 +510,16 @@ public:
                     dst_ptr[dst_pos] = wld_ptr[i] / norm;
                 }
             }
-            if(params.has(Parameters::HOMOGENITY)) {
+            if(p.has(Parameters::HOMOGENITY)) {
                 cv::Mat homogenity;
-                cslibs_vision::Homogenity::standard(homogenity, homogenity);
+                cslibs_vision::Homogenity::standard(src_as_float, homogenity);
 
                 resample<uchar>(homogenity, homogenity);
-                cv::filter2D(homogenity, homogenity, CV_32F, kernel);
+                if(p.kernel_type != Parameters::NONE)
+                    cv::filter2D(homogenity, homogenity, CV_32F, kernel);
 
                 float norm = 1.f;
-                if(params.normalize_patterns)
+                if(p.normalize_patterns)
                     norm = 255.f;
 
                 const int    homogenity_size = homogenity.cols * homogenity.rows;
@@ -529,23 +533,24 @@ public:
             cv::Mat gray_as_float(src_as_float.rows, src_as_float.cols, CV_32FC1, cv::Scalar());
             cv::cvtColor(src_as_float, gray_as_float, CV_BGR2GRAY);
 
-            const std::size_t feature_size = params.featureSize(src.rows, src.cols);
+            const std::size_t feature_size = p.featureSize(src.rows, src.cols);
             dst = cv::Mat(1, feature_size, CV_32FC1, cv::Scalar());
             float      *dst_ptr = dst.ptr<float>();
             std::size_t dst_pos = 0;
 
-            if(params.has(Parameters::HOG)) {
+            if(p.has(Parameters::HOG)) {
                 cv::Mat magnitude;
                 double  max_magnitude;
                 std::vector<cv::Mat> hog;
-                HOG::standard(gray_as_float, params.hog_bin_size, hog, magnitude, max_magnitude);
-                if(!params.normalize_magnitude) {
+                HOG::standard(gray_as_float, p.hog_bin_size, hog, magnitude, max_magnitude);
+                if(!p.normalize_magnitude) {
                     max_magnitude = 1.0;
                 }
 
-                if(params.has(Parameters::MAGNITUDE)) {
+                if(p.has(Parameters::MAGNITUDE)) {
                     resample<float>(magnitude, magnitude);
-                    cv::filter2D(magnitude, magnitude, CV_32F, kernel);
+                    if(p.kernel_type != Parameters::NONE)
+                        cv::filter2D(magnitude, magnitude, CV_32F, kernel);
 
                     const int    magnitude_size = magnitude.rows * magnitude.cols;
                     const float *magnitude_ptr  = magnitude.ptr<float>();
@@ -555,7 +560,8 @@ public:
                 }
                 for(cv::Mat &h : hog) {
                     resample<float>(h,h);
-                    cv::filter2D(h,h, CV_32F, kernel);
+                    if(p.kernel_type != Parameters::NONE)
+                        cv::filter2D(h,h, CV_32F, kernel);
 
                     const int    hog_size = h.rows * h.cols;
                     const float *hog_ptr = h.ptr<float>();
@@ -563,17 +569,18 @@ public:
                         dst_ptr[dst_pos] = hog_ptr[i] / max_magnitude;
                     }
                 }
-            } else if(params.has(Parameters::MAGNITUDE)) {
+            } else if(p.has(Parameters::MAGNITUDE)) {
                 cv::Mat magnitude;
                 double norm = 1.0;
-                if(params.normalize_magnitude) {
+                if(p.normalize_magnitude) {
                     Magnitude::compute(gray_as_float, magnitude, norm);
                 } else {
                     Magnitude::compute(gray_as_float, magnitude);
                 }
 
                 resample<float>(magnitude, magnitude);
-                cv::filter2D(magnitude, magnitude, CV_32F, kernel);
+                if(p.kernel_type != Parameters::NONE)
+                    cv::filter2D(magnitude, magnitude, CV_32F, kernel);
 
                 const int    magnitude_size = magnitude.rows * magnitude.cols;
                 const float *magnitude_ptr = magnitude.ptr<float>();
@@ -581,11 +588,12 @@ public:
                     dst_ptr[dst_pos] = magnitude_ptr[i] / norm;
                 }
             }
-            if(params.has(Parameters::LUV)) {
+            if(p.has(Parameters::LUV)) {
                 cv::Mat luv = cv::Mat(src.rows, src.cols, CV_32FC3, cv::Scalar());
                 cv::cvtColor(src_as_float, luv, CV_BGR2Luv);
                 resample<float>(luv, luv);
-                cv::filter2D(luv, luv, CV_32F, kernel);
+                if(p.kernel_type != Parameters::NONE)
+                    cv::filter2D(luv, luv, CV_32F, kernel);
 
                 const int luv_channels = luv.channels();
                 const float *luv_ptr = luv.ptr<float>();
@@ -599,14 +607,15 @@ public:
                     }
                 }
             }
-            if(params.has(Parameters::LBP)) {
+            if(p.has(Parameters::LBP)) {
                 cv::Mat lbp;
-                cslibs_vision::LBP::standard(gray_as_float, params.k, lbp);
+                cslibs_vision::LBP::standard(gray_as_float, p.k, lbp);
                 resample<uchar>(lbp,lbp);
-                cv::filter2D(lbp, lbp, CV_32F, kernel);
+                if(p.kernel_type != Parameters::NONE)
+                    cv::filter2D(lbp, lbp, CV_32F, kernel);
 
                 float norm = 1.f;
-                if(params.normalize_patterns)
+                if(p.normalize_patterns)
                     norm = 255.f;
 
                 const int    lbp_size = lbp.rows * lbp.cols;
@@ -615,14 +624,15 @@ public:
                     dst_ptr[dst_pos] = lbp_ptr[i] / norm;
                 }
             }
-            if(params.has(Parameters::LTP)) {
+            if(p.has(Parameters::LTP)) {
                 cv::Mat ltp;
-                cslibs_vision::LTP::standard(gray_as_float, params.k, ltp);
+                cslibs_vision::LTP::standard(gray_as_float, p.k, ltp);
                 resample<uchar>(ltp, ltp);
-                cv::filter2D(ltp, ltp, CV_32F, kernel);
+                if(p.kernel_type != Parameters::NONE)
+                    cv::filter2D(ltp, ltp, CV_32F, kernel);
 
                 float norm = 1.f;
-                if(params.normalize_patterns)
+                if(p.normalize_patterns)
                     norm = 255.f;
 
                 const int    ltp_channels = ltp.channels();
@@ -637,15 +647,16 @@ public:
                     }
                 }
             }
-            if(params.has(Parameters::WLD)) {
+            if(p.has(Parameters::WLD)) {
                 cv::Mat wld;
                 cslibs_vision::WLD::standard(gray_as_float, wld);
 
                 resample<uchar>(wld, wld);
-                cv::filter2D(wld, wld, CV_32F, kernel);
+                if(p.kernel_type != Parameters::NONE)
+                    cv::filter2D(wld, wld, CV_32F, kernel);
 
                 float norm = 1.f;
-                if(params.normalize_patterns)
+                if(p.normalize_patterns)
                     norm = 255.f;
 
                 const int    wld_size = wld.cols * wld.rows;
@@ -654,15 +665,16 @@ public:
                     dst_ptr[dst_pos] = wld_ptr[i] / norm;
                 }
             }
-            if(params.has(Parameters::HOMOGENITY)) {
+            if(p.has(Parameters::HOMOGENITY)) {
                 cv::Mat homogenity;
-                cslibs_vision::Homogenity::standard(homogenity, homogenity);
+                cslibs_vision::Homogenity::standard(gray_as_float, homogenity);
 
                 resample<uchar>(homogenity, homogenity);
-                cv::filter2D(homogenity, homogenity, CV_32F, kernel);
+                if(p.kernel_type != Parameters::NONE)
+                    cv::filter2D(homogenity, homogenity, CV_32F, kernel);
 
                 float norm = 1.f;
-                if(params.normalize_patterns)
+                if(p.normalize_patterns)
                     norm = 255.f;
 
                 const int    homogenity_size = homogenity.cols * homogenity.rows;
