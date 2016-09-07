@@ -46,12 +46,14 @@ public:
         double     hog_bin_size;
         bool       hog_directed ;
         bool       normalize_magnitude;
+        bool       normalize_luv;
         KernelType kernel_type;
 
         Parameters() :
             hog_bin_size(rad(30.0)),
             hog_directed(false),
             normalize_magnitude(true),
+            normalize_luv(true),
             kernel_type(KERNEL_2D)
         {
         }
@@ -279,11 +281,28 @@ public:
             const int luv_channels = luv.channels();
             const float *luv_ptr = luv.ptr<float>();
             const int luv_step = luv_channels * luv.cols;
-            for(int c = 0 ; c < luv_channels ; ++c) {
-                for(int i = 0 ; i < luv.rows ; ++i) {
-                    for(int j = 0 ; j < luv.cols ; ++j) {
-                        dst_ptr[dst_pos] = luv_ptr[i * luv_step + j * luv_channels + c];
-                        ++dst_pos;
+            if(params.normalize_luv) {
+                std::array<float, 3> luv_minima = {0.f, -134.f,-140.f};
+                std::array<float, 3> luv_spans  = {100.f,354.f, 262.f};
+
+                for(int c = 0 ; c < luv_channels ; ++c) {
+                    const float channel_min = luv_minima[c];
+                    const float channel_span = luv_spans[c];
+                    for(int i = 0 ; i < luv.rows ; ++i) {
+                        for(int j = 0 ; j < luv.cols ; ++j) {
+                            dst_ptr[dst_pos] =
+                                    (luv_ptr[i * luv_step + j * luv_channels + c] - channel_min) / channel_span;
+                            ++dst_pos;
+                        }
+                    }
+                }
+            } else {
+                for(int c = 0 ; c < luv_channels ; ++c) {
+                    for(int i = 0 ; i < luv.rows ; ++i) {
+                        for(int j = 0 ; j < luv.cols ; ++j) {
+                            dst_ptr[dst_pos] = luv_ptr[i * luv_step + j * luv_channels + c];
+                            ++dst_pos;
+                        }
                     }
                 }
             }
@@ -598,11 +617,28 @@ public:
                 const int luv_channels = luv.channels();
                 const float *luv_ptr = luv.ptr<float>();
                 const int luv_step = luv_channels * luv.cols;
-                for(int c = 0 ; c < luv_channels ; ++c) {
-                    for(int i = 0 ; i < luv.rows ; ++i) {
-                        for(int j = 0 ; j < luv.cols ; ++j) {
-                            dst_ptr[dst_pos] = luv_ptr[i * luv_step + j * luv_channels + c];
-                            ++dst_pos;
+                if(p.normalize_luv) {
+                    std::array<float, 3> luv_minima = {0.f, -134.f,-140.f};
+                    std::array<float, 3> luv_spans  = {100.f,354.f, 262.f};
+
+                    for(int c = 0 ; c < luv_channels ; ++c) {
+                        const float channel_min = luv_minima[c];
+                        const float channel_span = luv_spans[c];
+                        for(int i = 0 ; i < luv.rows ; ++i) {
+                            for(int j = 0 ; j < luv.cols ; ++j) {
+                                dst_ptr[dst_pos] =
+                                        (luv_ptr[i * luv_step + j * luv_channels + c] - channel_min) / channel_span;
+                                ++dst_pos;
+                            }
+                        }
+                    }
+                } else {
+                    for(int c = 0 ; c < luv_channels ; ++c) {
+                        for(int i = 0 ; i < luv.rows ; ++i) {
+                            for(int j = 0 ; j < luv.cols ; ++j) {
+                                dst_ptr[dst_pos] = luv_ptr[i * luv_step + j * luv_channels + c];
+                                ++dst_pos;
+                            }
                         }
                     }
                 }
