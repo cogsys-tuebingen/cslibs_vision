@@ -408,7 +408,20 @@ public:
             throw std::runtime_error("Channel size must be one or three");
         }
 
-        cv::Mat kernel = createKernel2D();
+        cv::Mat kernel;
+        switch(params.kernel_type) {
+        case Parameters::NONE:
+            break;
+        case Parameters::KERNEL_1D:
+            kernel = createKernel1D();
+            break;
+        case Parameters::KERNEL_2D:
+            kernel = createKernel2D();
+            break;
+        default:
+            throw std::runtime_error("Unknown kernel type!");
+        }
+
         /// 1. filter
         if(p.kernel_type != Parameters::NONE)
             cv::filter2D(src_as_float, src_as_float, CV_32F, kernel);
