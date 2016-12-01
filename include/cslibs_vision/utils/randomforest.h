@@ -8,7 +8,14 @@ class RandomForest
 {
 public:
     typedef cv::Ptr<RandomForest> Ptr;
-    typedef cv::Ptr<cv::RandomTrees> CvForestPtr;
+
+#if CV_MAJOR_VERSION == 2
+    typedef cv::RandomTrees RandomTree;
+#elif CV_MAJOR_VERSION == 3
+    typedef cv::ml::RTrees RandomTree;
+#endif
+
+    typedef cv::Ptr<RandomTree> CvForestPtr;
 
     /**
      * @brief RandomForest container constructor.

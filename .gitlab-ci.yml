@@ -17,6 +17,11 @@ before_script:
   - mkdir -p ~/.ssh
   - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
 
+  # Here we are at /build/$CI_PROJECT_NAME
+  # For pure catkin projects, we need a workspace:
+  - mkdir -p ws/src/
+  - cd ws
+  - ln -s $CI_PROJECT_DIR src/$CI_PROJECT_NAME
 
 stages:
   - build
@@ -25,37 +30,22 @@ indigo:
   stage: build
   image: ros:indigo
   script:
-    - mkdir $CI_PROJECT_NAME
-    - mv * $CI_PROJECT_NAME || true
     - source /opt/ros/$(ls /opt/ros/ | sort -r | head -n 1)/setup.bash
-    - mkdir src
-    - mv $CI_PROJECT_NAME src/
-    #- cd src
-    #- ln -s $CI_PROJECT_DIR src/$CI_PROJECT_NAME
-    #- cd ..
     - rosdep install -y -r -i --from-paths src
     - catkin_make
 
-#jade:
-#  stage: build
-#  image: ros:jade
-#  script:
-#    - source /opt/ros/$(ls /opt/ros/ | sort -r | head -n 1)/setup.bash
-#    - mkdir src
-#    - cd src
-#    - ln -s $CI_PROJECT_DIR src/$CI_PROJECT_NAME
-#    - cd ..
-#    - rosdep install -y -r -i --from-paths src
-#    - catkin_make
+jade:
+  stage: build
+  image: ros:jade
+  script:
+    - source /opt/ros/$(ls /opt/ros/ | sort -r | head -n 1)/setup.bash
+    - rosdep install -y -r -i --from-paths src
+    - catkin_make
 
-#kinetic:
-#  stage: build
-#  image: ros:kinetic
-#  script:
-#    - source /opt/ros/$(ls /opt/ros/ | sort -r | head -n 1)/setup.bash
-#    - mkdir src
-#    - cd src
-#    - ln -s $CI_PROJECT_DIR src/$CI_PROJECT_NAME
-#    - cd ..
-#    - rosdep install -y -r -i --from-paths src
-#    - catkin_make
+kinetic:
+  stage: build
+  image: ros:kinetic
+  script:
+    - source /opt/ros/$(ls /opt/ros/ | sort -r | head -n 1)/setup.bash
+    - rosdep install -y -r -i --from-paths src
+    - catkin_make

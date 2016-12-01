@@ -3,7 +3,11 @@
 using namespace cslibs_vision;
 
 RandomForest::RandomForest() :
-    forest_(new cv::RandomTrees()),
+    #if CV_MAJOR_VERSION == 2
+    forest_(new RandomTree),
+    #elif CV_MAJOR_VERSION == 3
+    forest_(RandomTree::create()),
+    #endif
     is_trained_(false)
 {
 }
@@ -11,7 +15,11 @@ RandomForest::RandomForest() :
 bool RandomForest::load(const std::string &path)
 {
     try {
+#if CV_MAJOR_VERSION == 2
         forest_->load(path.c_str());
+#elif CV_MAJOR_VERSION == 3
+        forest_= cv::ml::StatModel::load<cv::ml::RTrees>(path);
+#endif
         is_trained_ = true;
         return true;
     } catch (cv::Exception e) {
@@ -168,11 +176,16 @@ void RandomForest::predictClassProbsMultiSampleMax(const cv::Mat &samples, std::
 
 void RandomForest::prediction(const cv::Mat &sample, std::map<int, float> &probs, int &maxClassID)
 {
+#if CV_MAJOR_VERSION == 2
     int ntrees = forest_->get_tree_count();
+#elif CV_MAJOR_VERSION == 3
+    float ntrees = (float) forest_->getRoots().size();
+#endif
     std::map<int,float> votes;
 
     /// COUNT
     try {
+#if CV_MAJOR_VERSION == 2
         int max_vote = 0;
         for(int i = 0 ; i < ntrees ; ++i) {
 
@@ -189,12 +202,19 @@ void RandomForest::prediction(const cv::Mat &sample, std::map<int, float> &probs
                 maxClassID  = tree_classID;
             }
         }
+#elif CV_MAJOR_VERSION == 3
+        std::vector<float> results;
+        int prediction_class_id = forest_->predict(sample, results);
+
+        for(float vote : results) {
+            ++votes[std::round(vote)];
+        }
+#endif
 
         /// NORMALIZE
         for(std::map<int,float>::iterator it = votes.begin() ; it != votes.end() ; ++it) {
             it->second /= (float) ntrees;
         }
-
     } catch (cv::Exception e) {
         std::cerr << "predictClass " << e.what() << std::endl;
     }
