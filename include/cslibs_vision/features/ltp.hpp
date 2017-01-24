@@ -188,7 +188,7 @@ private:
                 pos  = i * src.cols + j;
                 prev = pos - src.cols;
                 next = pos + src.cols;
-                center = src_ptr[pos] + k;
+                center = src_ptr[pos];
 
                 code_neg = 0;
                 code_pos = 0;

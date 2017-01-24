@@ -72,7 +72,7 @@ public:
     }
 protected:
     struct ResamplingBlockSize {
-        const static int width = 4;
+        const static int width  = 4;
         const static int height = 4;
     };
 
@@ -86,8 +86,9 @@ protected:
                                  CV_32FC(src.channels()),
                                  cv::Scalar());
 
-        const static int dx[] = {0, 1, 0, 1};
-        const static int dy[] = {0, 0, 1, 1};
+        const static int size = ResamplingBlockSize::height * ResamplingBlockSize::width;
+        const static int dx[] = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+        const static int dy[] = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3};
         const int channels = src.channels();
         const int step_src = src.cols * channels;
         const int step_buffer = buffer.cols * channels;
@@ -98,7 +99,7 @@ protected:
                 int pos_buffer = step_buffer * i + channels * j;
                 int pos_src = 4 * (i * step_src + j);
                 for(int c = 0 ; c < channels; ++c) {
-                    for(int d = 0 ; d < 4 ; ++d) {
+                    for(int d = 0 ; d < size ; ++d) {
                         buffer_ptr[pos_buffer] += (float) src_ptr[pos_src + dy[d] * step_src + dx[d] * channels + c];
                     }
                 }
