@@ -117,9 +117,9 @@ protected:
         cv::Mat kernel(3,3,CV_32FC1, cv::Scalar());
         const float factor = 1.f/4.f;
         float *data = kernel.ptr<float>();
-        data[0] = 1.f * factor;
-        data[1] = 2.f * factor;
-        data[2] = 1.f * factor;
+        data[3] = 1.f * factor;
+        data[4] = 2.f * factor;
+        data[5] = 1.f * factor;
 
         return kernel;
     }
