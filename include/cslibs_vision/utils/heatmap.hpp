@@ -11,7 +11,7 @@ namespace heatmap {
 
     inline void renderHeatmap(const cv::Mat &src,
                                     cv::Mat &dst,
-                                    colorFunction &color,
+                              const colorFunction &color,
                               const cv::Mat &mask = cv::Mat())
     {
         if(src.channels() > 1) {
