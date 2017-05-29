@@ -318,7 +318,7 @@ public:
 
 
     struct Parameters : public ACF::Parameters {
-        enum ChannelType {MAGNITUDE = 1, HOG = 2, LUV = 4, LBP = 8, LTP = 16, WLD = 32, HOMOGENITY = 64};
+        enum ChannelType {MAGNITUDE = 1, HOG = 2, LUV = 4, LBP = 8, LTP = 16, WLD = 32, HOMOGENITY = 64, RAW = 128};
 
         int             channel_types;
         bool            normalize_patterns;
@@ -385,6 +385,10 @@ public:
                 assert(src_cols > 2);
                 size += cslibs_vision::Homogenity::standardRows(src_rows) / ResamplingBlockSize::height *
                         cslibs_vision::Homogenity::standardCols(src_cols) / ResamplingBlockSize::width;
+            }
+            if (has(RAW)) {
+                size += src_rows / ResamplingBlockSize::height *
+                        src_cols / ResamplingBlockSize::width;
             }
             return size;
         }
@@ -561,6 +565,19 @@ public:
                     dst_ptr[dst_pos] = homogenity_ptr[i] / norm;
                 }
             }
+            if (p.has(Parameters::RAW)) {
+                cv::Mat raw;
+
+                resample<float>(src_as_float, raw);
+                if (p.kernel_type != Parameters::NONE)
+                    cv::filter2D(raw, raw, CV_32F, kernel);
+
+                const int    raw_size = raw.rows * raw.cols;
+                const float *raw_ptr = raw.ptr<float>();
+                for(int i = 0 ; i < raw_size ; ++i, ++dst_pos) {
+                    dst_ptr[dst_pos] = raw_ptr[i];
+                }
+            }
         } else {
             //// 3 channel
             cv::Mat gray_as_float(src_as_float.rows, src_as_float.cols, CV_32FC1, cv::Scalar());
@@ -733,7 +750,19 @@ public:
                     dst_ptr[dst_pos] = homogenity_ptr[i] / norm;
                 }
             }
+            if (p.has(Parameters::RAW)) {
+                cv::Mat raw;
 
+                resample<float>(gray_as_float, raw);
+                if (p.kernel_type != Parameters::NONE)
+                    cv::filter2D(raw, raw, CV_32F, kernel);
+
+                const int    raw_size = raw.rows * raw.cols;
+                const float *raw_ptr = raw.ptr<float>();
+                for(int i = 0 ; i < raw_size ; ++i, ++dst_pos) {
+                    dst_ptr[dst_pos] = raw_ptr[i];
+                }
+            }
 
 
         }
