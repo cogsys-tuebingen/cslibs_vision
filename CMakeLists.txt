@@ -123,6 +123,8 @@ add_custom_target(show_cslibs_vision_header_in_qt SOURCES
     include/cslibs_vision/features/wld.hpp
     include/cslibs_vision/features/hog.hpp
     include/cslibs_vision/features/acf.hpp
+    include/cslibs_vision/features/gabor.hpp
+    include/cslibs_vision/features/gradient_histogram.hpp
 
     include/cslibs_vision/utils/camera_calibration.h
     include/cslibs_vision/utils/cluster_boundaries.hpp

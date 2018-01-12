@@ -354,7 +354,7 @@ public:
             if(has(HOG)) {
                 size +=  src_rows / ResamplingBlockSize::height *
                         src_cols / ResamplingBlockSize::width *
-                        cslibs_vision::HOG::standarBins(hog_bin_size);
+                        cslibs_vision::HOG::standardBins(hog_bin_size);
             }
             if(has(LUV)) {
                 size += src_rows / ResamplingBlockSize::height *

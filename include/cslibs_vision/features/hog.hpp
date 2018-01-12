@@ -11,7 +11,7 @@ public:
 
     /// -UNDIRECTED------------------------------------------------------------------------------------------ ///
     /// ----------------------------------------------------------------------------------------------------- ///
-    static inline int  standarBins(const double bin_size)
+    static inline int  standardBins(const double bin_size)
     {
         return M_PI / bin_size;
     }
@@ -19,7 +19,8 @@ public:
     static inline void standard(const cv::Mat &src,
                                 const double   bin_size,
                                 cv::Mat       &dst_bins,
-                                cv::Mat       &dst_weights)
+                                cv::Mat       &dst_weights,
+                                const int      ksize = 3)
     {
         if(src.channels() > 1)
             throw std::runtime_error("Input matrix needs to be single channel!");
@@ -27,7 +28,7 @@ public:
         cv::Mat magnitude;
         cv::Mat dx;
         cv::Mat dy;
-        Magnitude::compute(src, magnitude, dx, dy);
+        Magnitude::compute(src, magnitude, dx, dy, ksize);
 
 
         const std::size_t bins = M_PI / bin_size;
@@ -42,7 +43,7 @@ public:
 
         const int size = magnitude.rows * magnitude.cols;
         for(int i = 0 ; i < size ; ++i) {
-            double angle = atan2(dy_ptr[i], dx_ptr[i]);
+            double angle = std::atan2(dy_ptr[i], dx_ptr[i]);
             if(angle < 0.0)
                 angle += M_PI;
 
@@ -54,25 +55,27 @@ public:
 
     static inline void standard(const cv::Mat        &src,
                                 const double          bin_size,
-                                std::vector<cv::Mat> &dst)
+                                std::vector<cv::Mat> &dst,
+                                const int             ksize = 3)
     {
         cv::Mat magnitude;
         double  max_magnitude;
-        standard(src, bin_size, dst, magnitude, max_magnitude);
+        standard(src, bin_size, dst, magnitude, max_magnitude, ksize);
     }
 
     static inline void standard(const cv::Mat        &src,
                                 const double          bin_size,
                                 std::vector<cv::Mat> &dst,
                                 cv::Mat              &magnitude,
-                                double               &max_magnitude)
+                                double               &max_magnitude,
+                                const int            ksize = 3)
     {
         if(src.channels() > 1)
             throw std::runtime_error("Input matrix needs to be single channel!");
 
         cv::Mat dx;
         cv::Mat dy;
-        Magnitude::compute(src, magnitude, dx, dy);
+        Magnitude::compute(src, magnitude, dx, dy, ksize);
 
 
         const std::size_t bins = M_PI / bin_size;
@@ -80,7 +83,9 @@ public:
         const float *dy_ptr = dy.ptr<float>();
         const float *magnitude_ptr = magnitude.ptr<float>();
 
-        dst.resize(bins, cv::Mat(magnitude.rows, magnitude.cols, CV_32FC1, cv::Scalar()));
+        for(std::size_t b = 0 ; b < bins ; ++b)
+            dst.emplace_back(cv::Mat(magnitude.rows, magnitude.cols, CV_32FC1, cv::Scalar()));
+
         max_magnitude = std::numeric_limits<double>::lowest();
         std::vector<float*> ptr_to_channels;
         for(cv::Mat &channel : dst) {
@@ -90,9 +95,11 @@ public:
 
         const int size = magnitude.rows * magnitude.cols;
         for(int i = 0 ; i < size ; ++i) {
-            double angle = atan2(dy_ptr[i], dx_ptr[i]);
+            /// todo : make this a parameters
+            double angle = std::atan2(-dy_ptr[i], dx_ptr[i]);
             if(angle < 0.0)
                 angle += M_PI;
+
 
             double m = magnitude_ptr[i];
             if(m > max_magnitude) {
@@ -113,7 +120,8 @@ public:
     static inline void directed(const cv::Mat &src,
                                 const double   bin_size,
                                 cv::Mat       &dst_bins,
-                                cv::Mat       &dst_weights)
+                                cv::Mat       &dst_weights,
+                                const int      ksize = 3)
     {
         if(src.channels() > 1)
             throw std::runtime_error("Input matrix needs to be single channel!");
@@ -122,7 +130,7 @@ public:
         cv::Mat magnitude;
         cv::Mat dx;
         cv::Mat dy;
-        Magnitude::compute(src, magnitude, dx, dy);
+        Magnitude::compute(src, magnitude, dx, dy, ksize);
 
         dst_bins = cv::Mat(magnitude.rows, magnitude.cols, CV_8UC1, cv::Scalar());
         dst_weights = cv::Mat(magnitude.rows, magnitude.cols, CV_32FC1, cv::Scalar());
@@ -136,7 +144,7 @@ public:
 
         const int size = magnitude.rows * magnitude.cols;
         for(int i = 0 ; i < size ; ++i) {
-            double angle = atan2(dy_ptr[i], dx_ptr[i]) + M_PI;
+            double angle = std::atan2(dy_ptr[i], dx_ptr[i]) + M_PI;
             std::size_t index = (std::size_t)(angle / bin_size) % bins;
             dst_bins_ptr[i] = index;
             dst_weights_ptr[i] = magnitude_ptr[i]; // *  255
@@ -145,11 +153,12 @@ public:
 
     static inline void directed(const cv::Mat        &src,
                                 const double          bin_size,
-                                std::vector<cv::Mat> &dst)
+                                std::vector<cv::Mat> &dst,
+                                const int ksize = 3)
     {
         cv::Mat magnitude;
         double max_magnitude;
-        standard(src, bin_size, dst, magnitude, max_magnitude);
+        standard(src, bin_size, dst, magnitude, max_magnitude, ksize);
     }
 
 
@@ -157,21 +166,24 @@ public:
                                 const double          bin_size,
                                 std::vector<cv::Mat> &dst,
                                 cv::Mat              &magnitude,
-                                double               &max_magnitude)
+                                double               &max_magnitude,
+                                const int             ksize = 3)
     {
         if(src.channels() > 1)
             throw std::runtime_error("Input matrix needs to be single channel!");
 
         cv::Mat dx;
         cv::Mat dy;
-        Magnitude::compute(src, magnitude);
+        Magnitude::compute(src, magnitude, dx, dy, ksize);
 
         const std::size_t bins = 2 * M_PI / bin_size;
         const float *dx_ptr = dx.ptr<float>();
         const float *dy_ptr = dy.ptr<float>();
         const float *magnitude_ptr = magnitude.ptr<float>();
 
-        dst.resize(bins, cv::Mat(magnitude.rows, magnitude.cols, CV_32FC1, cv::Scalar()));
+        for(std::size_t b = 0 ; b < bins ; ++b)
+            dst.emplace_back(cv::Mat(magnitude.rows, magnitude.cols, CV_32FC1, cv::Scalar()));
+
         std::vector<float*> ptr_to_channels;
         for(cv::Mat &channel : dst) {
             ptr_to_channels.emplace_back(channel.ptr<float>());
@@ -180,7 +192,7 @@ public:
 
         const int size = magnitude.rows * magnitude.cols;
         for(int i = 0 ; i < size ; ++i) {
-            double angle = atan2(dy_ptr[i], dx_ptr[i]) + M_PI;
+            double angle = std::atan2(dy_ptr[i], dx_ptr[i]) + M_PI;
 
             double m = magnitude_ptr[i];
             if(m > max_magnitude) {

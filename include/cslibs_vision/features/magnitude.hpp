@@ -11,10 +11,11 @@ public:
     inline static void compute(const cv::Mat &src,
                                cv::Mat &dst,
                                cv::Mat &dx,
-                               cv::Mat &dy)
+                               cv::Mat &dy,
+                               const int ksize = 3)
     {
-        cv::Sobel(src, dx, CV_32F, 1, 0);
-        cv::Sobel(src, dy, CV_32F, 0, 1);
+        cv::Sobel(src, dx, CV_32F, 1, 0, ksize);
+        cv::Sobel(src, dy, CV_32F, 0, 1, ksize);
         cv::magnitude(dx, dy, dst);
 
     }
