@@ -1,7 +1,7 @@
 #ifndef GRADIENT_HISTOGRAM_HPP
 #define GRADIENT_HISTOGRAM_HPP
 
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
 
 #include "magnitude.hpp"
 

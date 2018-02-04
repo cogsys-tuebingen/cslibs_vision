@@ -48,7 +48,7 @@ namespace heatmap {
 
         dst.convertTo(dst, CV_8UC3);
     }
-};
+}
 }
 
 
