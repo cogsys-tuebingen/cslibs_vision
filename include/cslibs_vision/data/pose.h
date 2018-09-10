@@ -23,6 +23,8 @@ public:
     Pose(const Eigen::Vector3d& position, const Eigen::Quaterniond& orientation);
 
 public:
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Eigen::Vector3d position;
     Eigen::Quaterniond orientation;
 };
