@@ -246,9 +246,18 @@ private:
                             w4 * src_ptr[pos_cy + cx];
 
                     center = src_ptr[pos] + k;
+#if __clang__
+/// Clang warns in the following line for _Tp == bool
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wabsolute-value"
+#endif
                     // we are dealing with floating point precision, so add some little tolerance
                     *dst_ptr += ((t > center) &&
                                 (std::abs(t - (center) > std::numeric_limits<double>::epsilon()))) << m;
+
+#if __clang__
+#pragma clang diagnostic pop
+#endif
                      ++dst_ptr;
                 }
             }

@@ -20,7 +20,7 @@ MatchablePose::MatchablePose(const Frame::Ptr frame)
 }
 
 MatchablePose::MatchablePose(const MatchablePose& pose)
-    : Matchable(keypoints, descriptors),
+    : Matchable(pose.keypoints, pose.descriptors),
       image(cv::Mat()),
       saved(pose.saved)
 {

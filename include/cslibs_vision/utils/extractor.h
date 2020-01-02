@@ -28,7 +28,7 @@ public:
      */
     struct Initializer {
         typedef boost::shared_ptr<Initializer> Ptr;
-
+        virtual ~Initializer() = default;
         virtual void init(Extractor*, const csapex::param::ParameterProvider&) = 0;
     };
 
