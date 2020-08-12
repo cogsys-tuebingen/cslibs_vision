@@ -37,7 +37,7 @@ void Extractor::extractKeypoints(const cv::Mat& frame, const cv::Mat& mask_roi, 
 //    if(frame.channels() == 1) {
 //        gray = frame;
 //    } else {
-//        cv::cvtColor(frame, gray, CV_BGR2GRAY);
+//        cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
 //    }
 
     try {

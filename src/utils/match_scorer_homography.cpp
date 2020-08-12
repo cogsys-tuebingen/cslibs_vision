@@ -65,7 +65,7 @@ double MatchScorerHomography::calculateScore(Matchable& frame, Matchable& refere
 
     matcher.matchFiltered(&reference, &frame, filtered_test_keypoints, filtered_frame_keypoints);
 
-    painter.drawKeypointsRoiHighlight(filtered_frame_keypoints, cv::Scalar(0, 255, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    painter.drawKeypointsRoiHighlight(filtered_frame_keypoints, cv::Scalar(0, 255, 255), static_cast<int>(cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS));
 
     if(no_of_features) {
         *no_of_features= filtered_frame_keypoints.size();
@@ -92,7 +92,7 @@ double MatchScorerHomography::calculateScore(Matchable& frame, Matchable& refere
             frame_points.push_back(filtered_frame_keypoints[j].pt);
         }
 
-        cv::Mat H = cv::findHomography(test_points, frame_points, CV_RANSAC, 3.0);
+        cv::Mat H = cv::findHomography(test_points, frame_points, cv::RANSAC, 3.0);
 
         if(painter.canPaint()) {
             std::vector<cv::Point2f> scene_corners = apply_homography(H, reference.getDimensions(), 0);
@@ -173,10 +173,10 @@ double MatchScorerHomography::qualityOf(const cv::Mat& H, const cv::Mat& image)
     //        return INFINITY;
     //    }
 
-    //    corners[0] = cvPoint(0, 0);
-    //    corners[1] = cvPoint(100, 0);
-    //    corners[2] = cvPoint(100, 100);
-    //    corners[3] = cvPoint(0, 100);
+    //    corners[0] = cv::Point(0, 0);
+    //    corners[1] = cv::Point(100, 0);
+    //    corners[2] = cv::Point(100, 100);
+    //    corners[3] = cv::Point(0, 100);
     //    if(scene_corners[0].x > scene_corners[1].x || scene_corners[0].x > scene_corners[2].x
     //            || scene_corners[3].x > scene_corners[1].x || scene_corners[3].x > scene_corners[2].x){
     //        INFO( "INFINITY: mirrored" );
@@ -240,10 +240,10 @@ std::vector<cv::Point2f> MatchScorerHomography::apply_homography(const cv::Mat& 
 
     std::vector<cv::Point2f> scene_corners(4);
     std::vector<cv::Point2f> corners(4);
-    corners[0] = cvPoint(padding,padding);
-    corners[1] = cvPoint(cols-padding, padding);
-    corners[2] = cvPoint(cols-padding, rows-padding);
-    corners[3] = cvPoint(padding, rows-padding);
+    corners[0] = cv::Point(padding,padding);
+    corners[1] = cv::Point(cols-padding, padding);
+    corners[2] = cv::Point(cols-padding, rows-padding);
+    corners[3] = cv::Point(padding, rows-padding);
 
     cv::perspectiveTransform(corners, scene_corners, H);
 
@@ -259,10 +259,10 @@ std::vector<cv::Point2f> MatchScorerHomography::apply_homography(const cv::Mat& 
     std::vector<cv::Point2f> scene_corners(4);
     std::vector<cv::Point2f> corners(4);
     int d = 1000;
-    corners[0] = cvPoint(0, 0);
-    corners[1] = cvPoint(d, 0);
-    corners[2] = cvPoint(d, d);
-    corners[3] = cvPoint(0, d);
+    corners[0] = cv::Point(0, 0);
+    corners[1] = cv::Point(d, 0);
+    corners[2] = cv::Point(d, d);
+    corners[3] = cv::Point(0, d);
 
     cv::perspectiveTransform(corners, scene_corners, H);
 

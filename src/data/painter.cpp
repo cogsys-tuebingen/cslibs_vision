@@ -4,6 +4,9 @@
 /// COMPONENT
 #include <cslibs_vision/data/frame.h>
 
+/// SYSTEM
+#include <opencv2/imgproc/imgproc_c.h>
+
 Painter::Painter(Matchable* target)
     : frame(dynamic_cast<Frame*>(target))
 {
@@ -140,7 +143,12 @@ void Painter::drawKeypointsRoiOverlay(cv::Scalar color, int flags)
     boost::recursive_mutex::scoped_lock lock(frame->mutex);
 
     cv::Mat tmp(frame->debug_img_tmp_roi.rows, frame->debug_img_tmp_roi.cols, frame->debug_img_tmp_roi.type(), cv::Scalar(0));
+
+#if CV_MAJOR_VERSION <=3
     cv::drawKeypoints(tmp, frame->keypoints, tmp, color, flags);
+#else
+    cv::drawKeypoints(tmp, frame->keypoints, tmp, color, static_cast<cv::DrawMatchesFlags>(flags));
+#endif
     cv::addWeighted(frame->debug_img_tmp_roi, 1.0, tmp, 0.7, 0, frame->debug_img_tmp_roi);
 }
 
@@ -149,6 +157,9 @@ void Painter::drawKeypointsRoiHighlight(std::vector<cv::KeyPoint> &pts, cv::Scal
     if(!frame) return;
 
     boost::recursive_mutex::scoped_lock lock(frame->mutex);
-
+#if CV_MAJOR_VERSION <=3
     cv::drawKeypoints(frame->debug_img_tmp_roi, pts, frame->debug_img_tmp_roi, color, flags);
+#else
+    cv::drawKeypoints(frame->debug_img_tmp_roi, pts, frame->debug_img_tmp_roi, color, static_cast<cv::DrawMatchesFlags>(flags));
+#endif
 }

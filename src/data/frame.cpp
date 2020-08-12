@@ -66,7 +66,7 @@ Frame::Ptr Frame::getScaledCopy(double scale) const
     boost::recursive_mutex::scoped_lock lock(mutex);
 
     cv::Mat img;
-    cv::resize(image_roi, img, cv::Size(), scale, scale, CV_INTER_LINEAR);
+    cv::resize(image_roi, img, cv::Size(), scale, scale, cv::INTER_LINEAR);
 
     Frame::Ptr tmp = FrameIO::convert(img);
 

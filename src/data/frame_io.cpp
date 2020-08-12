@@ -150,7 +150,7 @@ Frame::Ptr FrameIO::importSample(const std::string& dir, bool full, bool use_mas
         assert(image.rows == mask.rows);
 
         if(mask.type() != CV_8U) {
-            cv::cvtColor(mask, mask, CV_BGR2GRAY);
+            cv::cvtColor(mask, mask, cv::COLOR_BGR2GRAY);
         }
 
         frame.reset(new Frame(image, mask));

@@ -882,7 +882,7 @@ void PreemptiveSLIC::preemptiveSLIC(const Mat& I_rgb, const int k, const double 
   int* klabels = new int[sz];
 
   Mat I_lab;
-  cvtColor(I_rgb, I_lab, CV_BGR2Lab); // I_lab is CV_8UC3
+  cvtColor(I_rgb, I_lab, cv::COLOR_BGR2Lab); // I_lab is CV_8UC3
   
   // fill lab vectors
   m_lvec = new double[sz];

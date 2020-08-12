@@ -8,6 +8,9 @@
 #ifndef OPENCV_UTILS_HPP
 #define OPENCV_UTILS_HPP
 
+/// SYSTEM
+#include <opencv2/imgproc/imgproc_c.h>
+
 namespace cv
 {
 const int draw_shift_bits = 4;
@@ -18,7 +21,7 @@ static inline void drawKeypoint(Mat& img, const KeyPoint& p, const Scalar& color
     CV_Assert(!img.empty());
     Point center(cvRound(p.pt.x * draw_multiplier), cvRound(p.pt.y * draw_multiplier));
 
-    if(flags & DrawMatchesFlags::DRAW_RICH_KEYPOINTS) {
+    if(flags & static_cast<int>(DrawMatchesFlags::DRAW_RICH_KEYPOINTS)) {
         int radius = cvRound(p.size/2 * draw_multiplier); // KeyPoint::size is a diameter
 
         // draw the circles around keypoints with the keypoints size
@@ -58,7 +61,7 @@ static inline void drawConvexHull(const std::vector<Point>& hull, Mat& img, cons
 static cv::Scalar rangeColor(int i, int k)
 {
     cv::Mat col(1,1,CV_8UC3, cv::Scalar((255.0 * i) / k, 255, 255));
-    cv::cvtColor(col, col, CV_HSV2BGR);
+    cv::cvtColor(col, col, cv::COLOR_HSV2BGR);
     cv::Vec3b s = col.at<cv::Vec3b>(0,0);
     return cv::Scalar(s[0], s[1], s[2]);
 }

@@ -87,7 +87,7 @@ public:
      * @param color color to use
      * @param flags cv::DrawMatchesFlags
      */
-    void drawKeypointsRoi(cv::Scalar color, int flags = cv::DrawMatchesFlags::DEFAULT);
+    void drawKeypointsRoi(cv::Scalar color, int flags = static_cast<int>(cv::DrawMatchesFlags::DEFAULT));
 
     /**
      * @brief drawKeypointsRoiHighlight visualize keypoints user provided keypoints
@@ -95,14 +95,14 @@ public:
      * @param color color to use
      * @param flags cv::DrawMatchesFlags
      */
-    void drawKeypointsRoiHighlight(std::vector<cv::KeyPoint> &pts, cv::Scalar color, int flags = cv::DrawMatchesFlags::DEFAULT);
+    void drawKeypointsRoiHighlight(std::vector<cv::KeyPoint> &pts, cv::Scalar color, int flags = static_cast<int>(cv::DrawMatchesFlags::DEFAULT));
 
     /**
      * @brief drawKeypointsRoiOverlay visualize keypoints transparently
      * @param color color to use
      * @param flags cv::DrawMatchesFlags
      */
-    void drawKeypointsRoiOverlay(cv::Scalar color, int flags = cv::DrawMatchesFlags::DEFAULT);
+    void drawKeypointsRoiOverlay(cv::Scalar color, int flags = static_cast<int>(cv::DrawMatchesFlags::DEFAULT));
 
     /**
      * @brief drawRoi draws a rectangle around the current region of interest

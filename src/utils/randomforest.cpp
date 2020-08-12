@@ -5,7 +5,7 @@ using namespace cslibs_vision;
 RandomForest::RandomForest() :
     #if CV_MAJOR_VERSION == 2
     forest_(new RandomTree),
-    #elif CV_MAJOR_VERSION == 3
+    #elif CV_MAJOR_VERSION >= 3
     forest_(RandomTree::create()),
     #endif
     is_trained_(false)
@@ -17,7 +17,7 @@ bool RandomForest::load(const std::string &path)
     try {
 #if CV_MAJOR_VERSION == 2
         forest_->load(path.c_str());
-#elif CV_MAJOR_VERSION == 3
+#elif CV_MAJOR_VERSION >= 3
         forest_= cv::ml::StatModel::load<cv::ml::RTrees>(path);
 #endif
         is_trained_ = true;
@@ -178,7 +178,7 @@ void RandomForest::prediction(const cv::Mat &sample, std::map<int, float> &probs
 {
 #if CV_MAJOR_VERSION == 2
     int ntrees = forest_->get_tree_count();
-#elif CV_MAJOR_VERSION == 3
+#elif CV_MAJOR_VERSION >= 3
     float ntrees = (float) forest_->getRoots().size();
 #endif
     std::map<int,float> votes;
@@ -202,7 +202,7 @@ void RandomForest::prediction(const cv::Mat &sample, std::map<int, float> &probs
                 maxClassID  = tree_classID;
             }
         }
-#elif CV_MAJOR_VERSION == 3
+#elif CV_MAJOR_VERSION >= 3
         std::vector<float> results;
         int prediction_class_id = forest_->predict(sample, results);
 

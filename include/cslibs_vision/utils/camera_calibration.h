@@ -15,8 +15,8 @@ public:
     CameraCalibration(const Mode mode = CHESSBOARD,
                       const cv::Size &board_size = cv::Size(5,8),
                       const double square_size = 0.1, const int kernel_size = 11,
-                      const int flag_corner = CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS,
-                      const int flag_calib = CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
+                      const int flag_corner = cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_FILTER_QUADS,
+                      const int flag_calib = cv::CALIB_FIX_K4 | cv::CALIB_FIX_K5);
 
     virtual ~CameraCalibration();
 

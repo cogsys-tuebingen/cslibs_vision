@@ -11,7 +11,7 @@ public:
 
 #if CV_MAJOR_VERSION == 2
     typedef cv::RandomTrees RandomTree;
-#elif CV_MAJOR_VERSION == 3
+#elif CV_MAJOR_VERSION >= 3
     typedef cv::ml::RTrees RandomTree;
 #endif
 

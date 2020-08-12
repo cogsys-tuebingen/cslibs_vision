@@ -230,7 +230,7 @@ public:
             }
         } else {
             cv::Mat gray_as_float(src_as_float.rows, src_as_float.rows, CV_32FC1, cv::Scalar());
-            cv::cvtColor(src_as_float, gray_as_float, CV_BGR2GRAY);
+            cv::cvtColor(src_as_float, gray_as_float, cv::COLOR_BGR2GRAY);
 
             /// 2. calculate magnitude + 3. calculate hog
             cv::Mat magnitude;
@@ -255,7 +255,7 @@ public:
 
             /// 4. LUV -> it is important to set the destination type otherwise it won' work!
             cv::Mat luv = cv::Mat(src.rows, src.cols, CV_32FC3, cv::Scalar());
-            cv::cvtColor(src_as_float, luv, CV_BGR2Luv);
+            cv::cvtColor(src_as_float, luv, cv::COLOR_BGR2Luv);
             resample<float>(luv, luv);
             if(params.kernel_type != Parameters::NONE)
                 cv::filter2D(luv, luv, CV_32F, kernel);
@@ -581,7 +581,7 @@ public:
         } else {
             //// 3 channel
             cv::Mat gray_as_float(src_as_float.rows, src_as_float.cols, CV_32FC1, cv::Scalar());
-            cv::cvtColor(src_as_float, gray_as_float, CV_BGR2GRAY);
+            cv::cvtColor(src_as_float, gray_as_float, cv::COLOR_BGR2GRAY);
 
             const std::size_t feature_size = p.featureSize(src.rows, src.cols);
             dst = cv::Mat(1, feature_size, CV_32FC1, cv::Scalar());
@@ -640,7 +640,7 @@ public:
             }
             if(p.has(Parameters::LUV)) {
                 cv::Mat luv = cv::Mat(src.rows, src.cols, CV_32FC3, cv::Scalar());
-                cv::cvtColor(src_as_float, luv, CV_BGR2Luv);
+                cv::cvtColor(src_as_float, luv, cv::COLOR_BGR2Luv);
                 resample<float>(luv, luv);
                 if(p.kernel_type != Parameters::NONE)
                     cv::filter2D(luv, luv, CV_32F, kernel);

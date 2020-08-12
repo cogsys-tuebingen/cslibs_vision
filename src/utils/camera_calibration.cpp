@@ -11,7 +11,7 @@ CameraCalibration::CameraCalibration(const Mode mode, const cv::Size &board_size
     size_square_(square_size),
     enhance_kernel_(kernel_size,kernel_size),
     enhance_zero_(-1,-1),
-    enhance_term_(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1),
+    enhance_term_(cv::TermCriteria::EPS+cv::TermCriteria::MAX_ITER, 30, 0.1),
     flag_calib_(flag_calib),
     flag_corner_(flag_corner),
     buffer_found_(false)
@@ -43,8 +43,8 @@ void CameraCalibration::analyze(const cv::Mat &frame)
     case CHESSBOARD:
         buffer_found_ = cv::findChessboardCorners(frame, size_board_, buffer_corners_, flag_corner_);
 //////// TWO WORKING SOLUTION TO THE CORNER FLAGS ///////////////////////////////////////////
-//      CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
-//      CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
+//      cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_FAST_CHECK | cv::CALIB_CB_NORMALIZE_IMAGE);
+//      cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_FILTER_QUADS);
 ////////
         if(buffer_found_)
             enhanceCorners(frame, buffer_corners_);
@@ -155,7 +155,7 @@ void CameraCalibration::enhanceCorners(const cv::Mat &frame, std::vector<cv::Poi
     if(frame.type() == CV_8UC1)
         gray = frame;
     else
-        cv::cvtColor(frame, gray, CV_BGR2GRAY);
+        cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
     cv::cornerSubPix(gray, corners, enhance_kernel_, enhance_zero_, enhance_term_);
 }
 
@@ -188,7 +188,7 @@ void CameraCalibration::calculateReprojectionError(const std::vector<std::vector
     double total_error(0.0);
     for(std::vector<std::vector<cv::Point3f> >::const_iterator it = object_points.begin() ; it != object_points.end() ; ++it, ++i) {
         cv::projectPoints(cv::Mat(*it), rvecs.at(i), tvecs.at(i), camera_matrix, distortion, image_points);
-        double error = cv::norm(cv::Mat(buffer_image_points_.at(i)), cv::Mat(image_points), CV_L2);
+        double error = cv::norm(cv::Mat(buffer_image_points_.at(i)), cv::Mat(image_points), cv::NORM_L2);
         error *= error;
         unsigned int n = (*it).size();
         reprojection_errors.push_back(std::sqrt(error / (double) n));

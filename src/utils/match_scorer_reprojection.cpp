@@ -46,7 +46,7 @@ double MatchScorerReprojection::calculateScore(Matchable& frame, Matchable& refe
         }
 
         cv::Mat mask;
-        cv::Mat H = cv::findHomography(test_points, frame_points, CV_RANSAC, 3.0, mask);
+        cv::Mat H = cv::findHomography(test_points, frame_points, cv::RANSAC, 3.0, mask);
 
         // reprojection error
         double reprojection_error = 0;
