@@ -12,15 +12,16 @@ jobs:
         compiler: ["-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++"]
     steps:
     - uses: actions/checkout@v1
-    - uses: betwo/github-setup-catkin@v1.1.1
+    - uses: betwo/github-setup-catkin@master
       with:
         ros-version: 'kinetic'
         workspace: '$GITHUB_WORKSPACE'
     - name: install_compiler
       run: |
-        sudo add-apt-repository ppa:jonathonf/gcc-7.1
+        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+        sudo apt-get install -y software-properties-common build-essential g++-multilib
         sudo apt-get update
-        sudo apt-get install -y gcc-7 g++-7
+        sudo apt-get install -y gcc-7-multilib g++-7-multilib
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 50 --slave /usr/bin/g++ g++ /usr/bin/g++-7
         sudo update-alternatives --set gcc "/usr/bin/gcc-7"
     - name: build
@@ -35,7 +36,7 @@ jobs:
         compiler: ["-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++", "-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"]
     steps:
     - uses: actions/checkout@v1
-    - uses: betwo/github-setup-catkin@v1.1.1
+    - uses: betwo/github-setup-catkin@master
       with:
         ros-version: 'melodic'
         workspace: '$GITHUB_WORKSPACE'
@@ -53,7 +54,7 @@ jobs:
         compiler: ["-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++", "-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"]
     steps:
     - uses: actions/checkout@v1
-    - uses: betwo/github-setup-catkin@v1.1.1
+    - uses: betwo/github-setup-catkin@master
       with:
         ros-version: 'noetic'
         workspace: '$GITHUB_WORKSPACE'
